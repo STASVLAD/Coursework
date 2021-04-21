@@ -17,7 +17,12 @@ Development of an interactive shopping assistant for retail purchases
 ### III stage
 * Посмотреть реализации с фотками чеков
 * ТГ бот для покупок
-* Приложение на IOS для покупок 
+* Приложение на IOS для покупок
+
+### IV stage
+* ITEM-to-ITEM Recommendations
+    * Подход 1. Товары из той же категории
+    * Подход 2. На основе рецептов
 
 ## Plans
 ### Bot
@@ -40,3 +45,6 @@ Development of an interactive shopping assistant for retail purchases
 ## Issues
 * Можно ли работать совместно со встроенным функционалом Алисы или придется будет взять реализованный навык?
     * Нельзя
+
+## Datasets
+* https://dominikschmidt.xyz/simplified-recipes-1M/
