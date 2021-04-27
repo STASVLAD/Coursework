@@ -32,6 +32,13 @@ Development of an interactive shopping assistant for retail purchases
     * ClickHouse -> не получилось поменять путь к БД -> проблема общего плана -> фикс
     * PostgreSQL
 
+### VI stage
+* WEB-servers:
+    * Yandex.Cloud
+    * Heroku
+    * pythonanywhere
+    * ngrok
+
 ## Plans
 ### Bot
 1. Вести список покупок
