@@ -1,6 +1,6 @@
 # coding: utf-8
 from __future__ import unicode_literals
-from functools import lru_cache
+import psycopg2
 
 import json
 import logging
@@ -88,23 +88,19 @@ def handle_dialog(req, res):
 def get_suggests(user_id):
     session = sessionStorage[user_id]
 
-    # Выбираем две первые подсказки из массива.
-    suggests = [
-        {'title': suggest, 'hide': True}
-        for suggest in session['suggests'][:2]
-    ]
-
-    # Убираем первую подсказку, чтобы подсказки менялись каждый раз.
     session['suggests'] = session['suggests'][1:]
     sessionStorage[user_id] = session
 
-    # Если осталась только одна подсказка, предлагаем подсказку
-    # со ссылкой на Яндекс.Маркет.
-    if len(suggests) < 2:
-        suggests.append({
-            "title": "Ладно",
-            "url": "https://market.yandex.ru/search?text=слон",
-            "hide": True
-        })
+    with conn.cursor() as cursor:
+        conn.autocommit = True
+        values = [
+            ('ALA', 'Almaty', 'Kazakhstan'),
+            ('TSE', 'Astana', 'Kazakhstan'),
+            ('PDX', 'Portland', 'USA'),
+        ]
+        insert = sql.SQL('INSERT INTO city (code, name, country_name) VALUES {}').format(
+            sql.SQL(',').join(map(sql.Literal, values))
+        )
+        cursor.execute(insert)
 
     return suggests
