@@ -8,6 +8,9 @@ import logging
 from flask import Flask, request
 app = Flask(__name__)
 
+# testing
+shopping_list = ['молоко', 'сыр', 'хлеб']
+# testing
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -44,21 +47,21 @@ def main():
 
 
 def handle_dialog(req, res):
-    user_id = req['session']['user_id']
+    user_id = req['user']['user_id']
 
     if req['session']['new']:
         # Это новый пользователь.
         # Инициализируем сессию и поприветствуем его.
 
         sessionStorage[user_id] = {
-            'suggests': [
-                "Не хочу.",
-                "Не буду.",
-                "Отстань!",
-            ]
+            'shopping_list': shopping_list
         }
 
-        res['response']['text'] = 'Привет! Купи слона!'
+        if not shopping_list:
+            res['response']['text'] = 'Привет! Помочь с покупками?'
+        else:
+            res['response']['text'] = 'Привет! Не забудь купить {}'.format(shopping_list)
+
         res['response']['buttons'] = get_suggests(user_id)
         return
 
