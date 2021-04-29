@@ -10,7 +10,8 @@ CREATE TABLE public.shopping_list
     quantity integer,
     created_on timestamp(0) without time zone NOT NULL,
     CONSTRAINT shopping_list_pkey PRIMARY KEY (id),
-    CONSTRAINT shopping_list_user_id_product_key UNIQUE (user_id, product)
+    CONSTRAINT shopping_list_user_id_product_key UNIQUE (user_id, product),
+    CONSTRAINT quantity_check CHECK (quantity >= 0)
 )
 
 TABLESPACE pg_default;
