@@ -6,7 +6,7 @@ def connect():
     return psycopg2.connect(dbname='postgres', user='postgres', password='coursework')
 
 
-def purge_items(conn):
+def purge_table(conn):
     with conn.cursor(cursor_factory=DictCursor) as cursor:
         truncate = "TRUNCATE shopping_list"
         cursor.execute(truncate)
@@ -39,17 +39,30 @@ def add_items(conn, user_id, products, quantity):
     return
 
 
-def del_items(conn, user_id, products, quantity):
+def del_items(conn, user_id, products=None, quantity=None, all=False):
     with conn.cursor(cursor_factory=DictCursor) as cursor:
-        rows = list(zip(*(products, quantity)))
-        CONDITIONS = '\n'.join(f"WHEN product = '{row[0]}'" +
-                               f"THEN GREATEST(quantity - {row[1]}, 0)" for row in rows)
-        update = f"""UPDATE shopping_list
-                     SET quantity = CASE
-                        {CONDITIONS}
-                        ELSE quantity
-                     END
-                     WHERE user_id = '{user_id}';"""
+        if all:
+            update = f"""UPDATE shopping_list
+                         SET quantity = 0
+                         WHERE user_id = '{user_id}';"""
+        else:
+            rows = list(zip(*(products, quantity)))
+            CONDITIONS = '\n'.join(f"WHEN product = '{row[0]}'" +
+                                   f"THEN GREATEST(quantity - {row[1]}, 0)" for row in rows)
+            update = f"""UPDATE shopping_list
+                         SET quantity = CASE
+                            {CONDITIONS}
+                            ELSE quantity
+                         END
+                         WHERE user_id = '{user_id}';"""
         cursor.execute(update)
         conn.commit()
     return
+
+
+def is_new_user(conn, user_id):
+    with conn.cursor(cursor_factory=DictCursor) as cursor:
+        select = f"SELECT user_id FROM shopping_list WHERE user_id = '{user_id}'"
+        cursor.execute(select)
+        records = cursor.fetchall()
+    return records
