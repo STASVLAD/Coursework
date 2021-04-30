@@ -1,13 +1,13 @@
-from utils import utils
+from utils import db
 
 
 def session_new_handler(res, conn, user_id):
-    if utils.is_new_user(user_id):
+    if not db.is_new_user(conn, user_id):
         res['response']['text'] = 'Описание навыка'  # TODO Описание навыка
     else:
-        shopping_list = utils.get_items(conn, user_id)
+        shopping_list = db.get_items(conn, user_id)
         if not shopping_list:
-            res['response']['text'] = 'Привет! Твой список покупок пуст :(.\nПомочь с покупками?'
+            res['response']['text'] = 'Привет! Твой список покупок пуст :(\nПомочь с покупками?'
         else:
             res['response']['card']['type'] = "ItemsList"
             res['response']['card']['header'] = 'Привет! Твой список покупок:'

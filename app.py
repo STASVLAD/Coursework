@@ -38,12 +38,12 @@ def main():
 
 
 def dialog_handler(req, res, conn):
-    user_id = req['user']['user_id']
+    user_id = req['session']['user']['user_id']
 
     if req['session']['new']:
         handler.session_new_handler(res, conn, user_id)
 
-    elif req['buttons']['payload'] == 'del_all' or req['request']['nlu']['intents']['del_all_items']:
+    elif req.get('buttons', {}).get('payload') == 'del_all' or req['request']['nlu']['intents'].get('del_all_items'):
         db.del_items(conn, user_id, all=True)
         res['response']['text'] = 'Список покупок пуст!'
 

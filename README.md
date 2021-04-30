@@ -39,6 +39,9 @@ Development of an interactive shopping assistant for retail purchases
     * pythonanywhere
     * ngrok
 * DATASETS?
+* В качестве сущностей буду использовать 3500 ингредиентов
+    * обработка уменьшительно-ласкательных (Алиса не умеет)
+    * обработка падежей (Алиса умеет - %lemma)
 
 ## Plans
 ### Bot
