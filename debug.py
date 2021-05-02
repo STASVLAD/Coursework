@@ -1,4 +1,3 @@
-import nltk
 import pymorphy2
 from nltk.corpus import stopwords
 
@@ -23,24 +22,22 @@ def gramma_info(tokens, morph, intent_start, intent_end, remove_stopwords=True):
             elif p.normal_form.isnumeric():
                 gramma_info[p.normal_form] = 'NUM'
             else:
-                gramma_info[p.normal_form] = p.tag.POS
+                gramma_info[p.normal_form] = str(p.tag.POS)
 
     return gramma_info
 
 
 gr_i = gramma_info(tokens, pymorphy2.MorphAnalyzer(), 5, 27, remove_stopwords=True)
 
+product = ''
 products = []
 quantities = []
 units = []
 no_quantity, no_unit, no_adj = True, True, True
 
 for item, pos in gr_i.items():
-    product = ''
-    quantity, unit = None, None
-    print(item)
     if pos == 'NUM':
-        quantities.append(item)
+        quantities.append(int(item))
         no_quantity = False
     if pos == 'UNITS':
         units.append(item)
@@ -55,5 +52,5 @@ for item, pos in gr_i.items():
         if no_quantity:
             quantities.append(1)
         if no_unit:
-            quantities.append(None)
+            units.append(None)
         no_quantity, no_unit, no_adj = True, True, True

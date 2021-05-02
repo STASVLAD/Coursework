@@ -1,7 +1,7 @@
 from utils import db
 
 
-def session_new_handler(res, conn, user_id):
+def session_new_response(res, conn, user_id):
     if not db.is_new_user(conn, user_id):
         res['response']['text'] = 'Описание навыка'  # TODO Описание навыка
     else:
@@ -18,5 +18,19 @@ def session_new_handler(res, conn, user_id):
             res['response']['buttons']['title'] = 'Очистить'
             res['response']['buttons']['payload'] = 'del_all'
             res['response']['buttons']['hide'] = True
+
+    return
+
+
+def add_items_response(res, conn, user_id):
+    res['response']['card']['type'] = "ItemsList"
+    res['response']['card']['header'] = 'Привет! Твой список покупок:'
+    res['response']['card']['items'][0]["title"] = "Заголовок для изображения 0"
+    res['response']['card']['items'][0]['description'] = 'description0\ndescription0\ndescription0'
+    res['response']['card']['items'][1]["title"] = "Заголовок для изображения 1"
+    res['response']['card']['items'][1]['description'] = 'description1\ndescription1\ndescription1'
+    res['response']['buttons']['title'] = 'Очистить'
+    res['response']['buttons']['payload'] = 'del_all'
+    res['response']['buttons']['hide'] = True
 
     return

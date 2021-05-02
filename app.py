@@ -8,18 +8,13 @@ from flask import Flask, request
 from nltk.corpus import stopwords
 
 from utils import db
-from utils import handler
+from utils import response
 from utils import parser
-
-
-morph = pymorphy2.MorphAnalyzer()
-
-stop_words = stopwords.words("russian")
-stop_words.extend(['добавь', 'список', 'продуктов', 'продукты', 'продукт', 'другую', 'ещё', 'другая', 'купить'])
-
 
 app = Flask(__name__)
 logging.basicConfig(level=logging.DEBUG)
+
+morph = pymorphy2.MorphAnalyzer()
 
 
 @app.route("/", methods=['POST'])
@@ -52,7 +47,7 @@ def dialog_handler(req, res, conn):
 
     # новая сессия
     if req['session']['new']:
-        handler.session_new_handler(res, conn, user_id)
+        response.session_new_response(res, conn, user_id)
 
     # очистить список
     elif req.get('buttons', {}).get('payload') == 'del_all' or req['request']['nlu']['intents'].get('del_all_items'):
@@ -61,9 +56,24 @@ def dialog_handler(req, res, conn):
 
     # добавить продукты
     elif list(req['request']['nlu']['intents'].keys())[0] == "add_items_nltk":  # TODO: "add_items"
-        products, quantities = parser.add_items_parser()
+        tokens = req['request']['nlu']['tokes']
+        intent_start = req['request']['nlu']['intents']['add_items_nltk']['slots']['food']['tokens']['start']
+        intent_end = req['request']['nlu']['intents']['add_items_nltk']['slots']['food']['tokens']['end']
+
+        gr_i = parser.gramma_info(morph, tokens, intent_start, intent_end)
+        products, quantities, units = parser.tokens_parser(gr_i)  # TODO: "units"
         db.add_items(conn, user_id, products, quantities)
-        res['response']['text'] = 'Вот что сейчас в вашем списке покупок.'
+        response.add_items_response(conn, user_id, products, quantities)
+
+    elif list(req['request']['nlu']['intents'].keys())[0] == "del_items":
+        tokens = req['request']['nlu']['tokes']
+        intent_start = req['request']['nlu']['intents']['del_items']['slots']['food']['tokens']['start']
+        intent_end = req['request']['nlu']['intents']['del_items']['slots']['food']['tokens']['end']
+
+        gr_i = parser.gramma_info(morph,    tokens, intent_start, intent_end)
+        products, quantities, units = parser.tokens_parser(gr_i)  # TODO: "units"
+        db.dell_items(conn, user_id, products, quantities)
+        response.del_items_response(conn, user_id, products, quantities)
 
     else:
         res['response']['text'] = 'Кайф!'
