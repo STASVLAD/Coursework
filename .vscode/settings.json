@@ -5,6 +5,7 @@
         "gramma",
         "info",
         "isnumeric",
+        "pformat",
         "psycopg"
     ]
 }

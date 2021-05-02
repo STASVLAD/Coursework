@@ -1,9 +1,9 @@
 from nltk.corpus import stopwords
 
 UNITS = ['килограмм', 'грамм', 'литр', 'пакет', 'пакетик', 'бутылка', 'упаковка', 'булка', 'пачка']
-STOP_WORDS = stopwords.words("russian").extend(['добавь', 'список', 'продуктов',
-                                                'продукты', 'продукт', 'другую',
-                                                'ещё', 'другая', 'купить'])
+STOP_WORDS = stopwords.words("russian")
+STOP_WORDS.extend(['добавь', 'список', 'продуктов', 'продукты', 'продукт', 'другую',
+                   'ещё', 'другая', 'купить'])
 
 
 def gramma_info(morph, tokens, intent_start, intent_end, remove_stopwords=True):

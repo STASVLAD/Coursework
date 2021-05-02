@@ -11,6 +11,8 @@ from utils import db
 from utils import response
 from utils import parser
 
+from pprint import pformat
+
 app = Flask(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
@@ -19,7 +21,7 @@ morph = pymorphy2.MorphAnalyzer()
 
 @app.route("/", methods=['POST'])
 def main():
-    logging.info('Request: %r', request.json)
+    logging.info('Request\n' + str(pformat(request.json)))
     conn = db.connect()
 
     response = {
@@ -32,7 +34,7 @@ def main():
 
     dialog_handler(request.json, response, conn)
 
-    logging.info('Response: %r', response)
+    logging.info('Response\n' + str(pformat(response)))
     conn.close()
 
     return json.dumps(
@@ -55,22 +57,22 @@ def dialog_handler(req, res, conn):
         res['response']['text'] = 'Ваш список покупок теперь пуст!'
 
     # добавить продукты
-    elif list(req['request']['nlu']['intents'].keys())[0] == "add_items_nltk":  # TODO: "add_items"
-        tokens = req['request']['nlu']['tokes']
+    elif req['request']['nlu']['intents'].get("add_items_nltk"):  # TODO: "add_items"
+        tokens = req['request']['nlu']['tokens']
         intent_start = req['request']['nlu']['intents']['add_items_nltk']['slots']['food']['tokens']['start']
         intent_end = req['request']['nlu']['intents']['add_items_nltk']['slots']['food']['tokens']['end']
 
         gr_i = parser.gramma_info(morph, tokens, intent_start, intent_end)
         products, quantities, units = parser.tokens_parser(gr_i)  # TODO: "units"
         db.add_items(conn, user_id, products, quantities)
-        response.add_items_response(conn, user_id, products, quantities)
+        response.add_items_response(res, conn, user_id, products, quantities)
 
-    elif list(req['request']['nlu']['intents'].keys())[0] == "del_items":
-        tokens = req['request']['nlu']['tokes']
-        intent_start = req['request']['nlu']['intents']['del_items']['slots']['food']['tokens']['start']
-        intent_end = req['request']['nlu']['intents']['del_items']['slots']['food']['tokens']['end']
+    elif req['request']['nlu']['intents'].get("del_items"):
+        tokens = req['request']['nlu']['tokens']
+        intent_start = int(req['request']['nlu']['intents']['del_items']['slots']['food']['tokens']['start'])
+        intent_end = int(req['request']['nlu']['intents']['del_items']['slots']['food']['tokens']['end'])
 
-        gr_i = parser.gramma_info(morph,    tokens, intent_start, intent_end)
+        gr_i = parser.gramma_info(morph, tokens, intent_start, intent_end)
         products, quantities, units = parser.tokens_parser(gr_i)  # TODO: "units"
         db.dell_items(conn, user_id, products, quantities)
         response.del_items_response(conn, user_id, products, quantities)

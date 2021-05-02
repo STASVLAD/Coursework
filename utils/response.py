@@ -9,27 +9,27 @@ def session_new_response(res, conn, user_id):
         if not shopping_list:
             res['response']['text'] = 'Привет! Твой список покупок пуст :(\nПомочь с покупками?'
         else:
-            res['response']['card']['type'] = "ItemsList"
+            res['response'].setdefault('card', {})['type'] = "ItemsList"
             res['response']['card']['header'] = 'Привет! Твой список покупок:'
-            res['response']['card']['items'][0]["title"] = "Заголовок для изображения 0"
+            res['response']['card'].setdefault('items', []).append({"title": "Заголовок для изображения 0"})
             res['response']['card']['items'][0]['description'] = 'description0\ndescription0\ndescription0'
-            res['response']['card']['items'][1]["title"] = "Заголовок для изображения 1"
+            res['response']['card']['items'].append({"title": "Заголовок для изображения 1"})
             res['response']['card']['items'][1]['description'] = 'description1\ndescription1\ndescription1'
-            res['response']['buttons']['title'] = 'Очистить'
+            res['response'].setdefault('buttons', {})['title'] = 'Очистить'
             res['response']['buttons']['payload'] = 'del_all'
             res['response']['buttons']['hide'] = True
 
     return
 
 
-def add_items_response(res, conn, user_id):
-    res['response']['card']['type'] = "ItemsList"
-    res['response']['card']['header'] = 'Привет! Твой список покупок:'
-    res['response']['card']['items'][0]["title"] = "Заголовок для изображения 0"
+def add_items_response(res, conn, user_id, products, quantities):
+    res['response'].setdefault('card', {})['type'] = "ItemsList"
+    # res['response']['card']['header'] = 'Привет! Твой список покупок:'
+    res['response']['card'].setdefault('items', []).append({"title": "Заголовок для изображения 0"})
     res['response']['card']['items'][0]['description'] = 'description0\ndescription0\ndescription0'
-    res['response']['card']['items'][1]["title"] = "Заголовок для изображения 1"
+    res['response']['card']['items'].append({"title": "Заголовок для изображения 1"})
     res['response']['card']['items'][1]['description'] = 'description1\ndescription1\ndescription1'
-    res['response']['buttons']['title'] = 'Очистить'
+    res['response'].setdefault('buttons', {})['title'] = 'Очистить'
     res['response']['buttons']['payload'] = 'del_all'
     res['response']['buttons']['hide'] = True
 
