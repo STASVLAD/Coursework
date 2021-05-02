@@ -23,9 +23,9 @@ def get_items(conn, user_id):
     return records
 
 
-def add_items(conn, user_id, products, quantity):
+def add_items(conn, user_id, products, quantities):
     with conn.cursor(cursor_factory=DictCursor) as cursor:
-        rows = list(zip(*(products, quantity)))
+        rows = list(zip(*(products, quantities)))
         VALUES = ', '.join(f"('{user_id}', '{row[0]}', {row[1]}, current_timestamp(0))" for row in rows)
         insert = f"""INSERT INTO 
                         shopping_list (user_id, product, quantity, created_on)
@@ -39,14 +39,14 @@ def add_items(conn, user_id, products, quantity):
     return
 
 
-def del_items(conn, user_id, products=None, quantity=None, all=False):
+def del_items(conn, user_id, products=None, quantities=None, all=False):
     with conn.cursor(cursor_factory=DictCursor) as cursor:
         if all:
             update = f"""UPDATE shopping_list
                          SET quantity = 0
                          WHERE user_id = '{user_id}';"""
         else:
-            rows = list(zip(*(products, quantity)))
+            rows = list(zip(*(products, quantities)))
             CONDITIONS = '\n'.join(f"WHEN product = '{row[0]}'" +
                                    f"THEN GREATEST(quantity - {row[1]}, 0)" for row in rows)
             update = f"""UPDATE shopping_list

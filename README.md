@@ -84,6 +84,10 @@ Development of an interactive shopping assistant for retail purchases
 ### Features
 1. ITEM-to-ITEM recommendation system
 
+### Assumptions
+* Числительные (и ед. измерения) идут ДО продукта
+    * ex. "Добавь в список покупок картошку 2 килограмма муки" -> картошка и 2 килограмма муки
+
 ## Workflow
 ### Тест функционала Алисы
 * Алиса умеет:
