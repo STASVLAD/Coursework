@@ -1,10 +1,12 @@
 {
     "cSpell.ignoreWords": [
+        "accs",
         "adjf",
         "dbname",
         "gramma",
         "info",
         "isnumeric",
+        "nomn",
         "pformat",
         "psycopg"
     ]
