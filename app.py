@@ -31,7 +31,8 @@ def main():
         }
     }
 
-    dialog_handler(request.json, response, conn)
+    case = dialog_handler(request.json, response, conn)
+    db_handler(case)  # TODO: @after_response()
 
     logging.info('Response\n' + str(pformat(response)))
     conn.close()
@@ -61,10 +62,10 @@ def dialog_handler(req, res, conn):
         db.del_items(conn, user_id, all=True)
 
     # добавить продукты
-    elif req['request']['nlu']['intents'].get("add_items_nltk"):  # TODO: "add_items"
+    elif req['request']['nlu']['intents'].get("add_items"):  # TODO: "add_items"
         tokens = req['request']['nlu']['tokens']
-        intent_start = req['request']['nlu']['intents']['add_items_nltk']['slots']['food']['tokens']['start']
-        intent_end = req['request']['nlu']['intents']['add_items_nltk']['slots']['food']['tokens']['end']
+        intent_start = req['request']['nlu']['intents']['add_items']['slots']['food']['tokens']['start']
+        intent_end = req['request']['nlu']['intents']['add_items']['slots']['food']['tokens']['end']
 
         gr_i = parser.gramma_info(tokens, intent_start, intent_end)
         products, quantities, units = parser.tokens_parser(gr_i)  # TODO: "units"
@@ -84,14 +85,10 @@ def dialog_handler(req, res, conn):
 
     # обработка кнопок "- перец(1)"
     elif req['request'].get("command") and req['request']['original_utterance'][0:2] == "- ":
-        products, quantities, units = [], [], []
-        product = ' '.join(req['request']['nlu']['tokens'][0:-1])
-        quantity = req['request']['nlu']['tokens'][-1]
-        products.append(product)
-        quantities.append(quantity)
-        # TODO: units.append(req['request']['nlu']['tokens'][2])
-        db.del_items(conn, user_id, products, quantities)
+        products = [' '.join(req['request']['nlu']['tokens'][0:-1])]
+        quantities = [1]
         response.del_items_response(res, products, quantities)
+        db.del_items(conn, user_id, products, quantities)
 
     # показать список
     elif req['request']['nlu']['intents'].get("get_items"):
@@ -101,4 +98,17 @@ def dialog_handler(req, res, conn):
     else:
         res['response']['text'] = 'Кайф!'
 
-    return
+    return 'case'
+
+
+def db_handler(case):
+    if case == 'new_session':
+        pass
+    elif case == '':
+        pass
+
+
+'''
+TEST_PHRASE:
+
+'''

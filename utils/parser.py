@@ -61,11 +61,12 @@ def make_agree(product, by='gender', gr_case='nomn'):
         adj = words[0]
         item = words[1]
         item_gender = str(config.morph.parse(item)[0].tag.gender)
+        print(item_gender)
         adj_agreed = config.morph.parse(adj)[0].inflect({item_gender}).word
         product_agreed = adj_agreed + ' ' + item
     if by == 'gr_case':
+        product_agreed = []
         for w in words:
-            product_agreed = []
             w_agreed = config.morph.parse(w)[0].inflect({gr_case}).word
             product_agreed.append(w_agreed)
         product_agreed = ' '.join(product_agreed)

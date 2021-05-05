@@ -3,7 +3,7 @@ from utils import config
 
 
 def add_items_response(res, products, quantities):
-    products_agreed = [make_agree(product, by='case', gr_case='accs') for product in products]
+    products_agreed = [make_agree(product, by='gr_case', gr_case='accs') for product in products]
     products_text = ', '.join(products_agreed)
     res['response']['text'] = f'Добавила {products_text} в ваш список покупок.'
     res['response'].setdefault('buttons', []).append(
