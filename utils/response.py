@@ -1,11 +1,11 @@
-from utils.parser import make_agree
-from utils import config
+def add_items_response(res, origs, quantities):
+    if len(origs) == 1:
+        res['response']['text'] = f'Добавила {origs[0]} в ваш список покупок.'
+    else:
+        origs_text = ', '.join(origs[:-1])
+        origs_text = origs_text + ' и ' + origs[-1]
+        res['response']['text'] = f'Добавила в ваш список покупок {origs_text}.'
 
-
-def add_items_response(res, products, quantities):
-    products_agreed = [make_agree(product, by='gr_case', gr_case='accs') for product in products]
-    products_text = ', '.join(products_agreed)
-    res['response']['text'] = f'Добавила {products_text} в ваш список покупок.'
     res['response'].setdefault('buttons', []).append(
         {'title': 'Список покупок',
          'payload': 'get_items',
@@ -14,20 +14,18 @@ def add_items_response(res, products, quantities):
         {'title': 'Список покупок',
          'payload': 'get_items',
          'hide': False})
-    res['response']['buttons'].append(
-        {'title': 'Очистить',
-         'payload': 'del_all',
-         'hide': True})
     return
 
 
-def del_items_response(res, products, quantities):
-    if len(products) == 1:
-        res['response']['text'] = f'Удалила {make_agree(products[0], by="case", gr_case="accs")} из вашего списка покупок'
+def del_items_response(res, origs: list, quantities: list):
+    if len(origs) == 1:
+        res['response']['text'] = f'Удалила {origs[0]} из вашего списка покупок.'
     else:
-        products_agreed = [make_agree(product, by='case', gr_case='accs') for product in products]
-        products_text = ', '.join(products_agreed)
-        res['response']['text'] = f'Удалила из вашего списка покупок {products_text}'
+        origs_text = ', '.join(origs[:-1])
+        origs_text = origs_text + ' и ' + origs[-1]
+        res['response']['text'] = f'Удалила из вашего списка покупок {origs_text}.'
+
+    # show_shopping_list(res, shopping_list)
 
     res['response'].setdefault('buttons', []).append(
         {'title': 'Список покупок',
@@ -49,15 +47,17 @@ def get_items_response(res, shopping_list):
         res['response']['text'] = 'Ваш список покупок пока пуст.'
     else:
         res['response']['text'] = 'Список покупок:'
-
-        for item in shopping_list:
-            res['response'].setdefault('buttons', []).append(
-                {'title': f'- {item[0]} ({item[1]})',
-                 'payload': 'del',
-                 'hide': False})
-
+        show_shopping_list(res, shopping_list)
         res['response'].setdefault('buttons', []).append(
             {'title': 'Очистить',
              'payload': 'del_all',
              'hide': True})
     return
+
+
+def show_shopping_list(res, shopping_list):
+    for item in shopping_list:
+        res['response'].setdefault('buttons', []).append(
+            {'title': f'- {item[0]} ({item[1]})',
+             'payload': 'del',
+             'hide': False})

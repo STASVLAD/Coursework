@@ -17,6 +17,8 @@ app = Flask(__name__)
 logging.basicConfig(level=logging.DEBUG)
 config.init()
 
+# shopping_list_cache = []
+
 
 @app.route("/", methods=['POST'])
 def main():
@@ -62,14 +64,14 @@ def dialog_handler(req, res, conn):
         db.del_items(conn, user_id, all=True)
 
     # добавить продукты
-    elif req['request']['nlu']['intents'].get("add_items"):  # TODO: "add_items"
+    elif req['request']['nlu']['intents'].get("add_items"):
         tokens = req['request']['nlu']['tokens']
         intent_start = req['request']['nlu']['intents']['add_items']['slots']['food']['tokens']['start']
         intent_end = req['request']['nlu']['intents']['add_items']['slots']['food']['tokens']['end']
 
         gr_i = parser.gramma_info(tokens, intent_start, intent_end)
-        products, quantities, units = parser.tokens_parser(gr_i)  # TODO: "units"
-        response.add_items_response(res, products, quantities)
+        products, quantities, units, origs = parser.tokens_parser(gr_i)  # TODO: "units"
+        response.add_items_response(res, origs, quantities)
         db.add_items(conn, user_id, products, quantities)
 
     # удалить продукты
@@ -79,21 +81,26 @@ def dialog_handler(req, res, conn):
         intent_end = int(req['request']['nlu']['intents']['del_items']['slots']['food']['tokens']['end'])
 
         gr_i = parser.gramma_info(tokens, intent_start, intent_end)
-        products, quantities, units = parser.tokens_parser(gr_i)  # TODO: "units"
-        response.del_items_response(res, products, quantities)
+        products, quantities, units, origs = parser.tokens_parser(gr_i)  # TODO: "units"
+        response.del_items_response(res, origs, quantities)
         db.del_items(conn, user_id, products, quantities)
 
     # обработка кнопок "- перец(1)"
     elif req['request'].get("command") and req['request']['original_utterance'][0:2] == "- ":
-        products = [' '.join(req['request']['nlu']['tokens'][0:-1])]
-        quantities = [1]
-        response.del_items_response(res, products, quantities)
-        db.del_items(conn, user_id, products, quantities)
+        product = ' '.join(req['request']['nlu']['tokens'][0:-1])
+        quantity = req['request']['nlu']['tokens'][-1]
+        orig = parser.make_agree(product, by='gr_case', gr_case='accs')
+        response.del_items_response(res, [orig], [quantity])
+        db.del_items(conn, user_id, [product], [quantity])
 
     # показать список
     elif req['request']['nlu']['intents'].get("get_items"):
         shopping_list = db.get_items(conn, user_id)
         response.get_items_response(res, shopping_list)
+
+    # обработка рекомендаций
+    elif req['request']['nlu']['intents'].get("suggest_items"):
+        pass
 
     else:
         res['response']['text'] = 'Кайф!'
@@ -107,8 +114,11 @@ def db_handler(case):
     elif case == '':
         pass
 
+#  thread = Thread(target=do_work, kwargs={'value': request.args.get('value', 20)})
+#    thread.start()
+
 
 '''
 TEST_PHRASE:
-Добавь в список покупок 1 бутылку воды, огурцы, помидоры, сметану и пакет молока, 2 бутылки оливкового масла, колбасу и пармезан    
+Добавь в список покупок 1 бутылку воды, огурцы, помидоры, сметану и пакет молока, 2 бутылки оливкового масла и колбасу, пармезан, а ещё острую приправу для сырого лосося и хороший бальзам для лица и нежный чай.    
 '''
