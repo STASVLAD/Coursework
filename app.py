@@ -1,19 +1,16 @@
 # coding: utf-8
 from __future__ import unicode_literals
+from pprint import pformat
+from utils import db, response, parser, config
 
 import json
 import logging
 from flask import Flask, request
-from nltk.corpus import stopwords
-
-from utils import db
-from utils import response
-from utils import parser
-from utils import config
-
-from pprint import pformat
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
+
 logging.basicConfig(level=logging.DEBUG)
 config.init()
 
@@ -45,7 +42,10 @@ def main():
 
 
 def dialog_handler(req, res, conn):
-    user_id = req['session']['user']['user_id']
+    try:
+        user_id = req['session']['user']['user_id']
+    except:
+        user_id = req['session']['application']['application_id']
 
     # новая сессия
     if req['session']['new']:
