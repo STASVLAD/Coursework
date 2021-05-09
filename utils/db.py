@@ -28,12 +28,11 @@ def add_items(conn, user_id, products, quantities):
         rows = list(zip(*(products, quantities)))
         VALUES = ', '.join(f"('{user_id}', '{row[0]}', {row[1]}, current_timestamp(0))" for row in rows)
         insert = f"""INSERT INTO
-                        shopping_list (user_id, product, quantity, created_on)
+                        shopping_list (user_id, product, quantity)
                      VALUES
                         {VALUES}
                      ON CONFLICT ON CONSTRAINT shopping_list_user_id_product_key DO UPDATE
-                        SET quantity = shopping_list.quantity + excluded.quantity,
-                            created_on = current_timestamp(0);"""
+                        SET quantity = shopping_list.quantity + excluded.quantity;"""
         cursor.execute(insert)
         conn.commit()
     return
