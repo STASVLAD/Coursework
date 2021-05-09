@@ -100,3 +100,12 @@ Development of an interactive shopping assistant for retail purchases
 
 ## Datasets
 * https://dominikschmidt.xyz/simplified-recipes-1M/
+
+## Parser
+* Natasha для news, поэтому особого смысла в ней нет
+* ДОПУЩЕНИЯ:
+    * прилагательные, числительные и ед. измерения ДО существительных
+* Проблемные фразы:
+    * майонез провансаль (Алиса :x:)
+    * чупа чупс (Алиса :x:)
+    * чай кристмас ти (Алиса :heavy_check_mark:)
