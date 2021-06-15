@@ -3,10 +3,16 @@ from psycopg2.extras import DictCursor
 
 
 def connect():
+    '''
+    Подключение к БД
+    '''
     return psycopg2.connect(dbname='postgres', user='postgres', password='coursework')
 
 
 def purge_table(conn):
+    '''
+    Удаление таблицы из БД
+    '''
     with conn.cursor(cursor_factory=DictCursor) as cursor:
         truncate = "TRUNCATE shopping_list"
         cursor.execute(truncate)
@@ -15,6 +21,9 @@ def purge_table(conn):
 
 
 def get_items(conn, user_id):
+    '''
+    Получение списка покупок пользователя
+    '''
     with conn.cursor(cursor_factory=DictCursor) as cursor:
         select = f"SELECT product, quantity FROM shopping_list WHERE user_id = '{user_id}'" + \
                  f"AND quantity <> 0;"
@@ -24,6 +33,9 @@ def get_items(conn, user_id):
 
 
 def add_items(conn, user_id, products, quantities):
+    '''
+    Добавление продуктов в список покупок пользователя
+    '''
     with conn.cursor(cursor_factory=DictCursor) as cursor:
         rows = list(zip(*(products, quantities)))
         VALUES = ', '.join(f"('{user_id}', '{row[0]}', {row[1]}, current_timestamp(0))" for row in rows)
@@ -39,6 +51,9 @@ def add_items(conn, user_id, products, quantities):
 
 
 def del_items(conn, user_id, products=None, quantities=None, all=False):
+    '''
+    Удаление продуктов из списка покупок пользователя
+    '''
     with conn.cursor(cursor_factory=DictCursor) as cursor:
         if all:
             update = f"""UPDATE shopping_list
@@ -60,6 +75,9 @@ def del_items(conn, user_id, products=None, quantities=None, all=False):
 
 
 def is_new_user(conn, user_id):
+    '''
+    Проверка на нового пользователя
+    '''
     with conn.cursor(cursor_factory=DictCursor) as cursor:
         select = f"SELECT user_id FROM shopping_list WHERE user_id = '{user_id}'"
         cursor.execute(select)
@@ -68,6 +86,9 @@ def is_new_user(conn, user_id):
 
 
 def update_freq(conn, user_id, products, frequencies):
+    '''
+    Обновление частоты рекомендаций товара
+    '''
     with conn.cursor(cursor_factory=DictCursor) as cursor:
         VALUES = ',\n'.join(f"({products[i]}, {frequencies[i]}" for i in range(len(products)))
         update = f"""UPDATE shopping_list
@@ -83,6 +104,9 @@ def update_freq(conn, user_id, products, frequencies):
 
 
 def get_freq(conn, user_id, recommend=True):
+    '''
+    Получение частоты рекомендаций товара
+    '''
     with conn.cursor(cursor_factory=DictCursor) as cursor:
         select = f"SELECT product, frequency FROM shopping_list WHERE user_id = '{user_id}'" + \
                  f"AND quantity = 0;"
@@ -92,6 +116,9 @@ def get_freq(conn, user_id, recommend=True):
 
 
 def del_freq(conn, user_id, products):
+    '''
+    Удаление частоты рекомендаций товара
+    '''
     with conn.cursor(cursor_factory=DictCursor) as cursor:
         CONDITIONS = f"user_id = '{user_id}' and (" + ' or '.join(f"product = {product}"
                                                                   for product in products) + ")"
