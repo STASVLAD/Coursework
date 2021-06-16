@@ -70,10 +70,9 @@ def dialog_handler(req, res, conn):
         intent_end = req['request']['nlu']['intents']['add_items']['slots']['food']['tokens']['end']
 
         tokens_no_stopwords, gr_i = parser.gramma_info(tokens, intent_start, intent_end)
-        # TODO: "units"
-        products, quantities, units, origs = parser.tokens_parser(tokens_no_stopwords, gr_i)
-        response.add_items_response(res, origs, quantities)
-        db.add_items(conn, user_id, products, quantities)
+        products, quantities, units, products_orig, units_orig = parser.tokens_parser(tokens_no_stopwords, gr_i)
+        response.add_items_response(res, products_orig, quantities, units_orig)
+        db.add_items(conn, user_id, products, quantities, units)
 
     # удалить продукты
     elif req['request']['nlu']['intents'].get("del_items"):
@@ -83,16 +82,18 @@ def dialog_handler(req, res, conn):
 
         tokens_no_stopwords, gr_i = parser.gramma_info(tokens, intent_start, intent_end)
         # TODO: "units"
-        products, quantities, units, origs = parser.tokens_parser(tokens_no_stopwords, gr_i)
-        response.del_items_response(res, origs, quantities)
+        products, quantities, units, products_orig, units_orig = parser.tokens_parser(tokens_no_stopwords, gr_i)
+        response.del_items_response(res, products_orig, quantities, units_orig)
         db.del_items(conn, user_id, products, quantities)
 
     # обработка кнопок "- товар, <кол-во>"
     elif req['request'].get("command") and req['request']['original_utterance'][0:2] == "- ":
-        product = ' '.join(req['request']['nlu']['tokens'][0:-1])
-        quantity = req['request']['nlu']['tokens'][-1]
+        tokens = req['request']['nlu']['tokens']
+        product_tokens = [token for token in tokens if len(token) > 1]
+        quantity = [token for token in tokens if token.isnumeric()][0]
+        product = ' '.join(product_tokens)
         orig = parser.make_agree(product, by='gr_case', gr_case='accs')
-        response.del_items_response(res, [orig], [quantity], minus=True)
+        response.del_items_response(res, [orig], [quantity], [None], minus=True)
         db.del_items(conn, user_id, [product], [quantity])
 
     # показать список
@@ -130,6 +131,8 @@ def db_handler(case):
 
 '''
 TEST_PHRASE:
+<<<ADD GOLD>>>
+Добавь в список покупок 1 бутылку воды, 2 килограмма огурцов, 2 помидора, репчатый лук, острую морковку по-корейски, сметану и пакет молока, 2 пачки масла и колбасу, пармезан, а ещё, пожалуйста, острую приправу для лосося и пачку чай.
 <<<ADD NORM>>>
 Добавь в список покупок 1 бутылку воды, огурцы, помидоры, острую морковку по-корейски в кляре, сметану и пакет молока, 2 бутылки оливкового масла и колбасу, пармезан, а ещё острую приправу для сырого лосося и хороший бальзам для лица и нежный чай.
 <<<ADD TRASH>>>

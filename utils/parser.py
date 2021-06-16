@@ -24,7 +24,7 @@ def gramma_info(tokens, intent_start, intent_end, remove_stopwords=True):
 
 def tokens_parser(tokens_no_stopwords, gr_i):
     adj, prep, advb = '', '', ''
-    origs, products, quantities, units = [], [], [], []
+    products_orig, products, quantities, units_orig, units = [], [], [], [], []
     no_quantity, no_unit = True, True
 
     for token in tokens_no_stopwords:
@@ -33,15 +33,16 @@ def tokens_parser(tokens_no_stopwords, gr_i):
             no_quantity = False
         if gr_i[token]['pos'] == 'UNITS':
             units.append(gr_i[token]['normal_form'])
+            units_orig.append(token)
             no_unit = False
         if gr_i[token]['pos'] == 'ADVB':
             if prep:
                 products[-1] = products[-1] + ' ' + prep + ' ' + token
-                origs[-1] = origs[-1] + ' ' + prep_orig + ' ' + token
+                products_orig[-1] = products_orig[-1] + ' ' + prep_orig + ' ' + token
                 prep = ''
             else:
                 products[-1] = products[-1] + ' ' + token
-                origs[-1] = origs[-1] + ' ' + token
+                products_orig[-1] = products_orig[-1] + ' ' + token
         if gr_i[token]['pos'] == 'ADJF':
             adj = gr_i[token]['normal_form']
             adj_orig = token
@@ -56,20 +57,21 @@ def tokens_parser(tokens_no_stopwords, gr_i):
                 w_orig = adj_orig + ' ' + w_orig
             if prep:
                 products[-1] = products[-1] + ' ' + prep + ' ' + w_orig
-                origs[-1] = origs[-1] + ' ' + prep_orig + ' ' + w_orig
+                products_orig[-1] = products_orig[-1] + ' ' + prep_orig + ' ' + w_orig
                 no_quantity, no_unit = True, True
                 adj, prep = '', ''
                 continue
-            origs.append(w_orig)
+            products_orig.append(w_orig)
             products.append(w_norm)
             if no_quantity:
                 quantities.append(1)
             if no_unit:
                 units.append(None)
+                units_orig.append(None)
             no_quantity, no_unit = True, True
             adj, prep = '', ''
 
-    return products, quantities, units, origs
+    return products, quantities, units, products_orig, units_orig
 
 
 def make_agree(product: str, by='gender', gr_case='nomn'):
