@@ -1,7 +1,7 @@
 # coding: utf-8
 from __future__ import unicode_literals
 from pprint import pformat
-from utils import db, response, parser, config
+from utils import db, response, parser, config, suggest
 
 import json
 import logging
@@ -74,6 +74,7 @@ def dialog_handler(req, res, conn):
         response.add_items_response(res, products_orig, quantities, units_orig)
         db.add_items(conn, user_id, products, quantities, units)
 
+    ###
     # удалить продукты
     elif req['request']['nlu']['intents'].get("del_items"):
         tokens = req['request']['nlu']['tokens']
@@ -81,10 +82,10 @@ def dialog_handler(req, res, conn):
         intent_end = int(req['request']['nlu']['intents']['del_items']['slots']['food']['tokens']['end'])
 
         tokens_no_stopwords, gr_i = parser.gramma_info(tokens, intent_start, intent_end)
-        # TODO: "units"
         products, quantities, units, products_orig, units_orig = parser.tokens_parser(tokens_no_stopwords, gr_i)
         response.del_items_response(res, products_orig, quantities, units_orig)
         db.del_items(conn, user_id, products, quantities)
+        db.update_freq(conn, user_id, products)
 
     # обработка кнопок "- товар, <кол-во>"
     elif req['request'].get("command") and req['request']['original_utterance'][0:2] == "- ":
@@ -95,6 +96,8 @@ def dialog_handler(req, res, conn):
         orig = parser.make_agree(product, by='gr_case', gr_case='accs')
         response.del_items_response(res, [orig], [quantity], [None], minus=True)
         db.del_items(conn, user_id, [product], [quantity])
+        db.update_freq(conn, user_id, [product])
+    ###
 
     # показать список
     elif req['request']['nlu']['intents'].get("get_items"):
@@ -102,21 +105,23 @@ def dialog_handler(req, res, conn):
         response.get_items_response(res, shopping_list)
 
     # обработка периодичных рекомендаций
-    elif req['request']['nlu']['intents'].get("suggest_items_periodic"):
-        pass
+    elif req['request']['nlu']['intents'].get("get_recs_freq"):
+        product_freq_cron = db.get_freq(conn, user_id)
+        recs_freq = suggest.suggest_freq(product_freq_cron)
+        response.get_freq_response(res, recs_freq)
 
-    # удаление таблицы из БД
-    elif req['request']['nlu']['intents'].get("reload"):
-        db.purge_table(conn)
-        res['response']['text'] = 'ТАБЛИЦА УДАЛЕНА'
-
-    # вывод стоимости товара
+    # TODO: вывод стоимости товара
     elif req['request']['nlu']['intents'].get("cost_items"):
         pass
 
     # обработка рецептурных рекомендаций
     elif req['request']['nlu']['intents'].get("suggest_items_recipes"):
         pass
+
+    # удаление таблицы из БД
+    elif req['request']['nlu']['intents'].get("reload"):
+        db.purge_table(conn)
+        res['response']['text'] = 'ТАБЛИЦА УДАЛЕНА'
 
     else:
         res['response']['text'] = req['request']['original_utterance']
@@ -130,14 +135,11 @@ def db_handler(case):
     elif case == '':
         pass
 
-#  thread = Thread(target=do_work, kwargs={'value': request.args.get('value', 20)})
-#    thread.start()
-
 
 '''
 TEST_PHRASE:
 <<<ADD GOLD>>>
-Добавь в список покупок 1 бутылку воды, 2 килограмма огурцов, 2 помидора, репчатый лук, острую морковку по-корейски, сметану и упаковку молока, 2 пачки масла и колбасу, пармезан, а ещё, пожалуйста, острую приправу для лосося и пачку чай.
+Добавь в список покупок 1 бутылку воды, 2 килограмма огурцов, 2 помидора, репчатый лук, острую морковку по-корейски, сметану и упаковку молока, 2 пачки масла и колбасу, пармезан, а ещё, пожалуйста, острую приправу для лосося и пачку чая.
 <<<ADD NORM>>>
 Добавь в список покупок 1 бутылку воды, огурцы, помидоры, острую морковку по-корейски в кляре, сметану и пакет молока, 2 бутылки оливкового масла и колбасу, пармезан, а ещё острую приправу для сырого лосося и хороший бальзам для лица и нежный чай.
 <<<ADD TRASH>>>

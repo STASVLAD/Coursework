@@ -78,3 +78,14 @@ def items_to_text(products_orig: list, quantities: list, units_orig):
     origs_text = (f'{origs_text} и {"" if quantities[-1] == 1 else quantities[-1]}'
                   f'{"" if units_orig[-1] is None else units_orig[-1]} {products_orig[-1]}')
     return origs_text
+
+
+def get_freq_response(res, recs_freq):
+    res['response']['text'] = 'Возможно Вам стоит купить:'
+
+    for item in recs_freq:
+        res['response'].setdefault('buttons', []).append(
+            {'title': f'- {item}',
+             'payload': 'del',
+             'hide': False})
+    return

@@ -47,6 +47,7 @@ def add_items(conn, user_id, products, quantities, units):
                         {VALUES}
                      ON CONFLICT ON CONSTRAINT shopping_list_user_id_product_key DO UPDATE
                         SET quantity = shopping_list.quantity + excluded.quantity,
+                            created_on = current_timestamp(0),
                             units = excluded.units;"""
         cursor.execute(insert)
         conn.commit()
@@ -88,19 +89,16 @@ def is_new_user(conn, user_id):
     return records
 
 
-def update_freq(conn, user_id, products, frequencies):
+def update_freq(conn, user_id, products):
     '''
     Обновление частоты рекомендаций товара
     '''
     with conn.cursor(cursor_factory=DictCursor) as cursor:
-        VALUES = ',\n'.join(f"({products[i]}, {frequencies[i]}" for i in range(len(products)))
         update = f"""UPDATE shopping_list
-                     SET frequency = tt.frequency
-                     FROM
-                        ( VALUES
-                            {VALUES}
-                        ) as tt (product, frequency)
-                     WHERE shopping_list.product = tt.product and user_id = '{user_id}';"""
+                     SET frequency = array_append(frequency, current_timestamp(0) - shopping_list.created_on)
+                     WHERE user_id = '{user_id}' 
+                           AND product IN ({' '.join("'" + product + "'" for product in products)})
+                           AND quantity = 0;"""
         cursor.execute(update)
         conn.commit()
     return
@@ -111,8 +109,8 @@ def get_freq(conn, user_id, recommend=True):
     Получение частоты рекомендаций товара
     '''
     with conn.cursor(cursor_factory=DictCursor) as cursor:
-        select = (f"SELECT product, frequency FROM shopping_list WHERE user_id = '{user_id}'"
-                  f"AND quantity = 0;")
+        select = (f"SELECT product, frequency, created_on FROM shopping_list WHERE user_id = '{user_id}'"
+                  f"AND frequency is NOT NULL;")
         cursor.execute(select)
         records = cursor.fetchall()
     return records
