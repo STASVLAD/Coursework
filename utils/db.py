@@ -20,13 +20,17 @@ def purge_table(conn):
     return
 
 
-def get_items(conn, user_id):
+def get_items(conn, user_id, for_cost=False):
     '''
     Получение списка покупок пользователя
     '''
     with conn.cursor(cursor_factory=DictCursor) as cursor:
-        select = (f"SELECT product, quantity, units FROM shopping_list WHERE user_id = '{user_id}'"
-                  f"AND quantity <> 0;")
+        if for_cost == True:
+            select = (f"SELECT product, quantity FROM shopping_list WHERE user_id = '{user_id}' "
+                      f"AND quantity <> 0;")
+        else:
+            select = (f"SELECT product, quantity, units FROM shopping_list WHERE user_id = '{user_id}' "
+                      f"AND quantity <> 0;")
         cursor.execute(select)
         records = cursor.fetchall()
     return records
@@ -40,7 +44,6 @@ def add_items(conn, user_id, products, quantities, units):
         rows = list(zip(*(products, quantities, units)))
         VALUES = ', '.join((f"('{user_id}', '{row[0]}', {row[1]}, "
                             f"'{-1 if row[2] is None else row[2]}', current_timestamp(0))") for row in rows)
-        print(VALUES)
         insert = f"""INSERT INTO
                         shopping_list (user_id, product, quantity, units, created_on)
                      VALUES
@@ -97,7 +100,7 @@ def update_freq(conn, user_id, products):
         update = f"""UPDATE shopping_list
                      SET frequency = array_append(frequency, current_timestamp(0) - shopping_list.created_on)
                      WHERE user_id = '{user_id}' 
-                           AND product IN ({' '.join("'" + product + "'" for product in products)})
+                           AND product IN ({', '.join("'" + product + "'" for product in products)})
                            AND quantity = 0;"""
         cursor.execute(update)
         conn.commit()
@@ -109,23 +112,35 @@ def get_freq(conn, user_id, recommend=True):
     Получение частоты рекомендаций товара
     '''
     with conn.cursor(cursor_factory=DictCursor) as cursor:
-        select = (f"SELECT product, frequency, created_on FROM shopping_list WHERE user_id = '{user_id}'"
-                  f"AND frequency is NOT NULL;")
+        select = (f"SELECT product, frequency, created_on FROM shopping_list WHERE user_id = '{user_id}' "
+                  f"AND frequency is NOT NULL "
+                  f"AND quantity = 0;")
         cursor.execute(select)
         records = cursor.fetchall()
     return records
 
 
-def del_freq(conn, user_id, products):
+# def del_freq(conn, user_id, products):
+#     '''
+#     Удаление частоты рекомендаций товара
+#     '''
+#     with conn.cursor(cursor_factory=DictCursor) as cursor:
+#         CONDITIONS = f"user_id = '{user_id}' and (" + ' or '.join(f"product = {product}"
+#                                                                   for product in products) + ")"
+#         update = f"""UPDATE shopping_list
+#                      SET frequency = NULL
+#                      WHERE {CONDITIONS};"""
+#         cursor.execute(update)
+#         conn.commit()
+#     return
+
+def get_cost(conn, products):
     '''
-    Удаление частоты рекомендаций товара
+    Получение частоты рекомендаций товара
     '''
     with conn.cursor(cursor_factory=DictCursor) as cursor:
-        CONDITIONS = f"user_id = '{user_id}' and (" + ' or '.join(f"product = {product}"
-                                                                  for product in products) + ")"
-        update = f"""UPDATE shopping_list
-                     SET frequency = NULL
-                     WHERE {CONDITIONS};"""
-        cursor.execute(update)
-        conn.commit()
-    return
+        select = (f"""SELECT product, price FROM product_prices
+                      WHERE product IN ({', '.join("'" + product + "'" for product in products)});""")
+        cursor.execute(select)
+        records = cursor.fetchall()
+    return records

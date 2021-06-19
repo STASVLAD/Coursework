@@ -80,12 +80,24 @@ def items_to_text(products_orig: list, quantities: list, units_orig):
     return origs_text
 
 
-def get_freq_response(res, recs_freq):
-    res['response']['text'] = 'Возможно Вам стоит купить:'
+def suggest_freq_response(res, recs_freq):
+    if len(recs_freq) > 0:
+        res['response']['text'] = 'Возможно Вам стоит купить:'
 
-    for item in recs_freq:
-        res['response'].setdefault('buttons', []).append(
-            {'title': f'- {item}',
-             'payload': 'del',
-             'hide': False})
+        for item in recs_freq:
+            res['response'].setdefault('buttons', []).append(
+                {'title': f'+ {item}',
+                 'payload': 'del',
+                 'hide': False})
+    else:
+        res['response']['text'] = 'Похоже Вы уже все купили'
+    return
+
+
+def get_cost_response(res, product_prices, product_quantity):
+    cost = 0
+    product_prices = {product: price for product, price in product_prices}
+    for product, quantity in product_quantity:
+        cost += quantity * product_prices.get(product, 100)
+    res['response']['text'] = f'Стоимость товаров составляет примерно {cost} руб.'
     return

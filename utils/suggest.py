@@ -1,22 +1,23 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from statistics import median
+import numpy as np
 
 
 def suggest_freq(pfc):
     recs = []
-    freq_lists = list(zip(*pfc))[1]
 
-    for freq_list in freq_lists:
-        for freq in freq-list:
-            freq = int(freq[0])
-
-    freq_medians = []
-    for freq_list in freq_lists:
-        freq_medians.append(median(freq_list))
-
+    freq_medians = {}
     for i in range(len(pfc)):
-        cron = datetime.strptime(pfc[i][2], '%Y-%m-%d %H:%M:%S')
-        if (datetime.now() - cron).days - freq_medians[i] >= 0:
-            recs.append(pfc[i][0])
+        freqs = np.array(pfc[i][1])
+        freqs = freqs[freqs > timedelta(0)]
+        if len(freqs) > 0:
+            freq_medians[pfc[i][0]] = median(freqs)
+        else:
+            freq_medians[pfc[i][0]] = timedelta(0)
+
+    for product, freq, cron in pfc:
+        # debug: datetime.now() : test = datetime.now() + timedelta(days=2)
+        if ((datetime.now() - cron).days >= freq_medians[product].days) and freq_medians[product].days != 0:
+            recs.append(product)
 
     return recs

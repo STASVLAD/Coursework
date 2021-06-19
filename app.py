@@ -63,6 +63,7 @@ def dialog_handler(req, res, conn):
         res['response']['text'] = 'Ваш список покупок теперь пуст!'
         db.del_items(conn, user_id, all=True)
 
+    ###
     # добавить продукты
     elif req['request']['nlu']['intents'].get("add_items"):
         tokens = req['request']['nlu']['tokens']
@@ -73,6 +74,16 @@ def dialog_handler(req, res, conn):
         products, quantities, units, products_orig, units_orig = parser.tokens_parser(tokens_no_stopwords, gr_i)
         response.add_items_response(res, products_orig, quantities, units_orig)
         db.add_items(conn, user_id, products, quantities, units)
+
+    # обработка кнопок "+ <товар>"
+    elif req['request'].get("command") and req['request']['original_utterance'][0:2] == "+ ":
+        tokens = req['request']['nlu']['tokens']
+        product_tokens = [token for token in tokens if len(token) > 1]
+        product = ' '.join(product_tokens)
+        orig = parser.make_agree(product, by='gr_case', gr_case='accs')
+        response.add_items_response(res, [orig], [1], [None])
+        db.add_items(conn, user_id, [product], [1], [None])
+    ###
 
     ###
     # удалить продукты
@@ -87,7 +98,7 @@ def dialog_handler(req, res, conn):
         db.del_items(conn, user_id, products, quantities)
         db.update_freq(conn, user_id, products)
 
-    # обработка кнопок "- товар, <кол-во>"
+    # обработка кнопок "- <товар>, <кол-во>"
     elif req['request'].get("command") and req['request']['original_utterance'][0:2] == "- ":
         tokens = req['request']['nlu']['tokens']
         product_tokens = [token for token in tokens if len(token) > 1]
@@ -108,11 +119,17 @@ def dialog_handler(req, res, conn):
     elif req['request']['nlu']['intents'].get("get_recs_freq"):
         product_freq_cron = db.get_freq(conn, user_id)
         recs_freq = suggest.suggest_freq(product_freq_cron)
-        response.get_freq_response(res, recs_freq)
+        response.suggest_freq_response(res, recs_freq)
 
-    # TODO: вывод стоимости товара
+    # вывод стоимости товара
     elif req['request']['nlu']['intents'].get("cost_items"):
-        pass
+        product_quantity = db.get_items(conn, user_id, for_cost=True)
+        if len(product_quantity) > 0:
+            products = list(zip(*product_quantity))[0]
+        else:
+            response.get_cost_response(res, [], [])
+        product_prices = db.get_cost(conn, products)
+        response.get_cost_response(res, product_prices, product_quantity)
 
     # обработка рецептурных рекомендаций
     elif req['request']['nlu']['intents'].get("suggest_items_recipes"):
