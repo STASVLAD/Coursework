@@ -1,4 +1,7 @@
 def add_items_response(res, products_orig, quantities, units_orig):
+    '''
+    Ответ системы пользователю в случае добавления товаров
+    '''
     if len(products_orig) == 1:
         res['response']['text'] = (f'Добавила {"" if int(quantities[0]) == 1 else quantities[0]} '
                                    f'{"" if units_orig[0] is None else units_orig[0] + " "}{products_orig[0]} в ваш список покупок.')
@@ -18,6 +21,9 @@ def add_items_response(res, products_orig, quantities, units_orig):
 
 
 def del_items_response(res, products_orig: list, quantities: list, units_orig, minus=False):
+    '''
+    Ответ системы пользователю в случае удаления товаров
+    '''
     if minus == True:
         res['response']['text'] = (f'Удалила {"" if units_orig[0] is None else units_orig[0] + " "}'
                                    f'{products_orig[0]} из вашего списка покупок.')
@@ -47,6 +53,9 @@ def del_items_response(res, products_orig: list, quantities: list, units_orig, m
 
 
 def get_items_response(res, shopping_list):
+    '''
+    Ответ системы пользователю в случае получения текущего списка покупок
+    '''
     if not shopping_list:
         res['response']['text'] = 'Ваш список покупок пока пуст.'
     else:
@@ -62,6 +71,9 @@ def get_items_response(res, shopping_list):
 
 
 def show_shopping_list(res, shopping_list):
+    '''
+    Форматирование текущего списка покупок для ответа пользователю
+    '''
     for item in shopping_list:
         res['response'].setdefault('buttons', []).append(
             {'title': f'- {item[0]}, {item[1]} {item[2][0] + "." if item[2] != "-1" else ""}',
@@ -70,6 +82,9 @@ def show_shopping_list(res, shopping_list):
 
 
 def items_to_text(products_orig: list, quantities: list, units_orig):
+    '''
+    Форматирование списка добавленных/удаленных товаров для ответа пользователю
+    '''
     origs_text = ', '.join((f'{"" if quantities[i] == 1 else quantities[i]} '
                             f'{"" if units_orig[i] is None else units_orig[i]} {products_orig[i]}')
                            for i in range(len(products_orig) - 1))
@@ -79,6 +94,9 @@ def items_to_text(products_orig: list, quantities: list, units_orig):
 
 
 def suggest_freq_response(res, recs_freq):
+    '''
+    Ответ системы пользователю в случае получения рекомендации по периодически покупаемым товарам
+    '''
     if len(recs_freq) > 0:
         res['response']['text'] = 'Возможно Вам стоит купить:'
 
@@ -93,6 +111,9 @@ def suggest_freq_response(res, recs_freq):
 
 
 def get_cost_response(res, product_prices, product_quantity):
+    '''
+    Ответ системы пользователю в случае получения стоимости товаров в корзине
+    '''
     cost = 0
     product_prices = {product: price for product, price in product_prices}
     for product, quantity in product_quantity:

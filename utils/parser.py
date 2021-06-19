@@ -2,6 +2,9 @@ from utils import config
 
 
 def gramma_info(tokens, intent_start, intent_end, remove_stopwords=True):
+    '''
+    Удаление стоп-слов, лемматизация, определение POS-тэгов (число/единица измерения/часть речи)
+    '''
     gr_i = {}
     tokens_no_stopwords = []
 
@@ -23,6 +26,9 @@ def gramma_info(tokens, intent_start, intent_end, remove_stopwords=True):
 
 
 def tokens_parser(tokens_no_stopwords, gr_i):
+    '''
+    Парсер запросов
+    '''
     adj, prep, advb = '', '', ''
     products_orig, products, quantities, units_orig, units = [], [], [], [], []
     no_quantity, no_unit = True, True
@@ -75,6 +81,9 @@ def tokens_parser(tokens_no_stopwords, gr_i):
 
 
 def make_agree(product: str, by='gender', gr_case='nomn'):
+    '''
+    Согласование слов по роду и падежу
+    '''
     words = product.split()
     if by == 'gender':
         adj = words[0]

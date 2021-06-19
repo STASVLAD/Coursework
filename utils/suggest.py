@@ -4,6 +4,9 @@ import numpy as np
 
 
 def suggest_freq(pfc):
+    '''
+    рекомендации для периодически покупаемых товаров
+    '''
     recs = []
 
     freq_medians = {}

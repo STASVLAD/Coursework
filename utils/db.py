@@ -120,23 +120,9 @@ def get_freq(conn, user_id, recommend=True):
     return records
 
 
-# def del_freq(conn, user_id, products):
-#     '''
-#     Удаление частоты рекомендаций товара
-#     '''
-#     with conn.cursor(cursor_factory=DictCursor) as cursor:
-#         CONDITIONS = f"user_id = '{user_id}' and (" + ' or '.join(f"product = {product}"
-#                                                                   for product in products) + ")"
-#         update = f"""UPDATE shopping_list
-#                      SET frequency = NULL
-#                      WHERE {CONDITIONS};"""
-#         cursor.execute(update)
-#         conn.commit()
-#     return
-
 def get_cost(conn, products):
     '''
-    Получение частоты рекомендаций товара
+    Получение стоимости товаров
     '''
     with conn.cursor(cursor_factory=DictCursor) as cursor:
         select = (f"""SELECT product, price FROM product_prices
