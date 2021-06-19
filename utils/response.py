@@ -29,8 +29,6 @@ def del_items_response(res, products_orig: list, quantities: list, units_orig, m
         origs_text = items_to_text(products_orig, quantities, units_orig)
         res['response']['text'] = f'Удалила из вашего списка покупок {origs_text}.'
 
-    # show_shopping_list(res, shopping_list)
-
     res['response'].setdefault('buttons', []).append(
         {'title': 'Список покупок',
          'payload': 'get_items',
