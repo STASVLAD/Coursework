@@ -110,18 +110,6 @@ def suggest_freq_response(res, recs_freq):
     return
 
 
-def get_cost_response(res, product_prices, product_quantity):
-    '''
-    Ответ системы пользователю в случае получения стоимости товаров в корзине
-    '''
-    cost = 0
-    product_prices = {product: price for product, price in product_prices}
-    for product, quantity in product_quantity:
-        cost += quantity * product_prices.get(product, 100)
-    res['response']['text'] = f'Стоимость товаров составляет примерно {cost} руб.'
-    return
-
-
 def suggest_recipes_response(res, recs_recipes):
     '''
     Ответ системы пользователю в случае получения рекомендации по рецептам
@@ -137,4 +125,16 @@ def suggest_recipes_response(res, recs_recipes):
                  'hide': False})
     else:
         res['response']['text'] = 'Извините, не нашла подходящих рецептов'
+    return
+
+
+def get_cost_response(res, product_prices, product_quantity):
+    '''
+    Ответ системы пользователю в случае получения стоимости товаров в корзине
+    '''
+    cost = 0
+    product_prices = {product: price for product, price in product_prices}
+    for product, quantity in product_quantity:
+        cost += quantity * product_prices.get(product, 100)
+    res['response']['text'] = f'Стоимость товаров составляет примерно {cost} руб.'
     return

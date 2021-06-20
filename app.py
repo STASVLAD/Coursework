@@ -138,6 +138,12 @@ def dialog_handler(req, res, conn):
         response.suggest_freq_response(res, recs_freq)
         conn.close()
 
+    # обработка рецептурных рекомендаций
+    elif req['request']['nlu']['intents'].get("suggest_items_recipes"):
+        recs_recipe = db.get_recipes(conn, user_id)
+        response.suggest_recipes_response(res, recs_recipe[0][0])
+        conn.close()
+
     # вывод стоимости товара
     elif req['request']['nlu']['intents'].get("cost_items"):
         product_quantity = db.get_items(conn, user_id, for_cost=True)
@@ -148,13 +154,6 @@ def dialog_handler(req, res, conn):
         product_prices = db.get_cost(conn, products)
         response.get_cost_response(res, product_prices, product_quantity)
         conn.close()
-
-    # обработка рецептурных рекомендаций
-    elif req['request']['nlu']['intents'].get("suggest_items_recipes"):
-        recs_recipe = db.get_recipes(conn, user_id)
-        response.suggest_recipes_response(res, user_id, recs_recipe)
-        conn.close()
-        pass
 
     # удаление таблицы из БД
     elif req['request']['nlu']['intents'].get("reload"):

@@ -154,7 +154,8 @@ def get_recipes(conn, user_id):
     '''
     with conn.cursor(cursor_factory=DictCursor) as cursor:
         select = (f"""SELECT recs FROM shopping_list
-                      WHERE user_id = '{user_id}';""")
+                      WHERE user_id = '{user_id}'
+                      LIMIT 1;""")
         cursor.execute(select)
         records = cursor.fetchall()
     return records
