@@ -143,7 +143,7 @@ def dialog_handler(req, res, conn):
     else:
         res['response']['text'] = req['request']['original_utterance']
 
-    return 'case'
+    return
 
 
 def db_handler(case):
