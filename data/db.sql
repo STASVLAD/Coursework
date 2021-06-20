@@ -11,6 +11,7 @@ CREATE TABLE public.shopping_list
     created_on timestamp(0) without time zone DEFAULT CURRENT_TIMESTAMP,
     units character varying(64) COLLATE pg_catalog."default",
     frequency interval day[],
+    recs character varying(64)[] COLLATE pg_catalog."default",
     CONSTRAINT shopping_list_pkey PRIMARY KEY (id),
     CONSTRAINT shopping_list_user_id_product_key UNIQUE (user_id, product)
 )

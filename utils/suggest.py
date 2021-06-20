@@ -53,13 +53,15 @@ def eval_score(x, basket):
 
 
 def suggest_recipes(df, basket):
-    scores = df['ingredients'].apply(eval_score, args=(basket,)).sort_values(ascending=False)
+    '''
+    Рекомендация рецептов для пользователя 
+    '''
     best_recipes = []
-    for best_idx in scores.index:
-        best_ingredients = scores[best_idx][1]
-        if (best_ingredients & basket):
-            best_recipes.append(best_idx)
+    for i in range(5):
+        scores = df['ingredients'].apply(eval_score, args=(basket,)).sort_values(ascending=False)
+        best_ingredients = set(scores[0][1])
+        best_recipes.append(scores.index[0])
         basket = basket - best_ingredients
-        if (len(basket) <= 1) or (len(best_recipes) == 5):
+        if len(basket) <= 1:
             break
     return best_recipes

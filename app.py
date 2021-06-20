@@ -1,15 +1,13 @@
-# coding: utf-8
 from __future__ import unicode_literals
 from pprint import pformat
 from utils import db, response, parser, config, suggest
 
 import json
 import logging
+import threading
 from flask import Flask, request
-from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)
 
 logging.basicConfig(level=logging.DEBUG)
 config.init()
@@ -28,17 +26,24 @@ def main():
         }
     }
 
-    case = dialog_handler(request.json, response, conn)
-    db_handler(case)  # TODO: @after_response()
+    dialog_handler(request.json, response, conn)
 
     logging.info('Response\n' + str(pformat(response)))
-    conn.close()
 
     return json.dumps(
         response,
         ensure_ascii=False,
         indent=2
     )
+
+
+def db_handler(conn, user_id):
+    products = db.get_items(conn, user_id, for_recipes=True)
+    products = set(list(zip(*products))[0])
+    recs_recipe = suggest.suggest_recipes(config.df, products)
+    db.add_recipes(conn, user_id, recs_recipe)
+    conn.close()
+    return
 
 
 def dialog_handler(req, res, conn):
@@ -56,12 +61,14 @@ def dialog_handler(req, res, conn):
             shopping_list = db.get_items(conn, user_id)
             response.get_items_response(res, shopping_list)
             res['response']['text'] = 'Привет!\n' + res['response']['text']
+            conn.close()
 
     # очистить список
     elif (req.get('buttons', {}).get('payload') == 'del_all' or
           req['request']['nlu']['intents'].get('del_all_items')):
         res['response']['text'] = 'Ваш список покупок теперь пуст!'
         db.del_items(conn, user_id, all=True)
+        conn.close()
 
     ###
     # добавить продукты
@@ -75,6 +82,9 @@ def dialog_handler(req, res, conn):
         response.add_items_response(res, products_orig, quantities, units_orig)
         db.add_items(conn, user_id, products, quantities, units)
 
+        thr = threading.Thread(target=db_handler, args=(conn, user_id))
+        thr.start()
+
     # обработка кнопок "+ <товар>"
     elif req['request'].get("command") and req['request']['original_utterance'][0:2] == "+ ":
         tokens = req['request']['nlu']['tokens']
@@ -83,6 +93,9 @@ def dialog_handler(req, res, conn):
         orig = parser.make_agree(product, by='gr_case', gr_case='accs')
         response.add_items_response(res, [orig], [1], [None])
         db.add_items(conn, user_id, [product], [1], [None])
+
+        thr = threading.Thread(target=db_handler, args=(conn, user_id))
+        thr.start()
     ###
 
     ###
@@ -97,6 +110,7 @@ def dialog_handler(req, res, conn):
         response.del_items_response(res, products_orig, quantities, units_orig)
         db.del_items(conn, user_id, products, quantities)
         db.update_freq(conn, user_id, products)
+        conn.close()
 
     # обработка кнопок "- <товар>, <кол-во>"
     elif req['request'].get("command") and req['request']['original_utterance'][0:2] == "- ":
@@ -108,18 +122,21 @@ def dialog_handler(req, res, conn):
         response.del_items_response(res, [orig], [quantity], [None], minus=True)
         db.del_items(conn, user_id, [product], [quantity])
         db.update_freq(conn, user_id, [product])
+        conn.close()
     ###
 
     # показать список
     elif req['request']['nlu']['intents'].get("get_items"):
         shopping_list = db.get_items(conn, user_id)
         response.get_items_response(res, shopping_list)
+        conn.close()
 
     # обработка периодичных рекомендаций
     elif req['request']['nlu']['intents'].get("get_recs_freq"):
         product_freq_cron = db.get_freq(conn, user_id)
         recs_freq = suggest.suggest_freq(product_freq_cron)
         response.suggest_freq_response(res, recs_freq)
+        conn.close()
 
     # вывод стоимости товара
     elif req['request']['nlu']['intents'].get("cost_items"):
@@ -130,31 +147,25 @@ def dialog_handler(req, res, conn):
             response.get_cost_response(res, [], [])
         product_prices = db.get_cost(conn, products)
         response.get_cost_response(res, product_prices, product_quantity)
+        conn.close()
 
     # обработка рецептурных рекомендаций
     elif req['request']['nlu']['intents'].get("suggest_items_recipes"):
-        products = db.get_items(conn, user_id, for_recipes=True)
-        products = set(list(zip(*products))[0])
-        recs_recipes = suggest.suggest_recipes(config.df, products)
-        response.suggest_recipes_response(res, recs_recipes)
+        recs_recipe = db.get_recipes(conn, user_id)
+        response.suggest_recipes_response(res, user_id, recs_recipe)
+        conn.close()
         pass
 
     # удаление таблицы из БД
     elif req['request']['nlu']['intents'].get("reload"):
         db.purge_table(conn)
         res['response']['text'] = 'ТАБЛИЦА УДАЛЕНА'
+        conn.close()
 
     else:
         res['response']['text'] = req['request']['original_utterance']
 
     return
-
-
-def db_handler(case):
-    if case == 'new_session':
-        pass
-    elif case == '':
-        pass
 
 
 '''

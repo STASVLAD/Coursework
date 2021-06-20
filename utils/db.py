@@ -102,7 +102,7 @@ def update_freq(conn, user_id, products):
     with conn.cursor(cursor_factory=DictCursor) as cursor:
         update = f"""UPDATE shopping_list
                      SET frequency = array_append(frequency, current_timestamp(0) - shopping_list.created_on)
-                     WHERE user_id = '{user_id}' 
+                     WHERE user_id = '{user_id}'
                            AND product IN ({', '.join("'" + product + "'" for product in products)})
                            AND quantity = 0;"""
         cursor.execute(update)
@@ -130,6 +130,31 @@ def get_cost(conn, products):
     with conn.cursor(cursor_factory=DictCursor) as cursor:
         select = (f"""SELECT product, price FROM product_prices
                       WHERE product IN ({', '.join("'" + product + "'" for product in products)});""")
+        cursor.execute(select)
+        records = cursor.fetchall()
+    return records
+
+
+def add_recipes(conn, user_id, recs_recipe):
+    '''
+    Добавление рекомендованных рецептов для пользователя
+    '''
+    with conn.cursor(cursor_factory=DictCursor) as cursor:
+        insert = f"""UPDATE shopping_list
+                     SET recs = ARRAY[{', '.join("'" + rec_recipe + "'" for rec_recipe in recs_recipe)}]
+                     WHERE user_id = '{user_id}'"""
+        cursor.execute(insert)
+        conn.commit()
+    return
+
+
+def get_recipes(conn, user_id):
+    '''
+    Получение рекомендованных рецептов для пользователя
+    '''
+    with conn.cursor(cursor_factory=DictCursor) as cursor:
+        select = (f"""SELECT recs FROM shopping_list
+                      WHERE user_id = '{user_id}';""")
         cursor.execute(select)
         records = cursor.fetchall()
     return records
