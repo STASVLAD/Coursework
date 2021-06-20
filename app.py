@@ -133,6 +133,10 @@ def dialog_handler(req, res, conn):
 
     # обработка рецептурных рекомендаций
     elif req['request']['nlu']['intents'].get("suggest_items_recipes"):
+        products = db.get_items(conn, user_id, for_recipes=True)
+        products = set(list(zip(*products))[0])
+        recs_recipes = suggest.suggest_recipes(config.df, products)
+        response.suggest_recipes_response(res, recs_recipes)
         pass
 
     # удаление таблицы из БД
@@ -163,4 +167,6 @@ TEST_PHRASE:
 Добавь следующие продукты: лосось в сладком соусе, кашу геркулес из ананасов и свежую ножку курицы, ещё бы не помешала рис круглозерный.
 <<<ADD TRASH>>>
 Удали из списка 3 лосося, кашу, 2 помидора, 10 сметан и пакет молока ещё 3 бутылки воды, воду и колбасу
+<<<ADD for RECIPES>>>
+Добавь куриную грудку, помидоры, сухарики, салат, яблоки, муку, яйца
 '''

@@ -1,4 +1,5 @@
 import pymorphy2
+import pandas as pd
 from nltk.corpus import stopwords
 
 
@@ -14,3 +15,6 @@ def init():
 
     global UNITS
     UNITS = ['кг', 'г', 'литр', 'пакет', 'пакетик', 'бутылка', 'упаковка', 'булка', 'пачка']
+
+    global df
+    df = pd.read_json('data/recipes.json')

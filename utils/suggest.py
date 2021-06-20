@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from statistics import median
 import numpy as np
+from math import isclose
 
 
 def suggest_freq(pfc):
@@ -24,3 +25,41 @@ def suggest_freq(pfc):
             recs.append(product)
 
     return recs
+
+
+def custom_intersection(basket, ingredients):
+    '''
+    пересечение корзины с ингредиентами рецепта
+    '''
+    intersec = []
+    for item in basket:
+        for ingredient in ingredients:
+            if item in ingredient.split():
+                intersec.append(item)
+                break
+    return intersec
+
+
+def eval_score(x, basket):
+    '''
+    score = len(intersection) / len(recipe)
+    '''
+    ingredients = set(x)
+    intersection = custom_intersection(basket, ingredients)
+    score = len(intersection) / len(ingredients)
+    if isclose(score, 1, rel_tol=1e-5):
+        score = -1
+    return (score, set(intersection))
+
+
+def suggest_recipes(df, basket):
+    scores = df['ingredients'].apply(eval_score, args=(basket,)).sort_values(ascending=False)
+    best_recipes = []
+    for best_idx in scores.index:
+        best_ingredients = scores[best_idx][1]
+        if (best_ingredients & basket):
+            best_recipes.append(best_idx)
+        basket = basket - best_ingredients
+        if (len(basket) <= 1) or (len(best_recipes) == 5):
+            break
+    return best_recipes

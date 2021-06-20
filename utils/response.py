@@ -120,3 +120,21 @@ def get_cost_response(res, product_prices, product_quantity):
         cost += quantity * product_prices.get(product, 100)
     res['response']['text'] = f'Стоимость товаров составляет примерно {cost} руб.'
     return
+
+
+def suggest_recipes_response(res, recs_recipes):
+    '''
+    Ответ системы пользователю в случае получения рекомендации по рецептам
+    '''
+    if len(recs_recipes) > 0:
+        res['response']['text'] = 'Возможно Вы хотели приготовить:'
+
+        for item in recs_recipes:
+            res['response'].setdefault('buttons', []).append(
+                {'title': f'https://eda.ru{item}',
+                 'url': f'https://eda.ru{item}',
+                 'payload': 'del',
+                 'hide': False})
+    else:
+        res['response']['text'] = 'Извините, не нашла подходящих рецептов'
+    return

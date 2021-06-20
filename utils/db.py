@@ -20,13 +20,16 @@ def purge_table(conn):
     return
 
 
-def get_items(conn, user_id, for_cost=False):
+def get_items(conn, user_id, for_cost=False, for_recipes=False):
     '''
     Получение списка покупок пользователя
     '''
     with conn.cursor(cursor_factory=DictCursor) as cursor:
         if for_cost == True:
             select = (f"SELECT product, quantity FROM shopping_list WHERE user_id = '{user_id}' "
+                      f"AND quantity <> 0;")
+        elif for_recipes == True:
+            select = (f"SELECT product FROM shopping_list WHERE user_id = '{user_id}' "
                       f"AND quantity <> 0;")
         else:
             select = (f"SELECT product, quantity, units FROM shopping_list WHERE user_id = '{user_id}' "
