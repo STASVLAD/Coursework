@@ -19,8 +19,8 @@ def suggest_freq(pfc):
         else:
             freq_medians[pfc[i][0]] = timedelta(0)
 
+    # debug: datetime.now() : test = datetime.now() + timedelta(days=2)
     for product, freq, cron in pfc:
-        # debug: datetime.now() : test = datetime.now() + timedelta(days=2)
         if ((datetime.now() - cron).days >= freq_medians[product].days) and freq_medians[product].days != 0:
             recs.append(product)
 
