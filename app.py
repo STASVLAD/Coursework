@@ -162,7 +162,7 @@ def dialog_handler(req, res, conn):
         conn.close()
 
     else:
-        res['response']['text'] = req['request']['original_utterance']
+        res['response']['text'] = 'Давайте к делу'
 
     return
 

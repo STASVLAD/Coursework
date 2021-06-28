@@ -88,7 +88,7 @@ def items_to_text(products_orig: list, quantities: list, units_orig):
     origs_text = ', '.join((f'{"" if quantities[i] == 1 else quantities[i]} '
                             f'{"" if units_orig[i] is None else units_orig[i]} {products_orig[i]}')
                            for i in range(len(products_orig) - 1))
-    origs_text = (f'{origs_text} и {"" if quantities[-1] == 1 else quantities[-1]}'
+    origs_text = (f'{origs_text} и {"" if quantities[-1] == 1 else str(quantities[-1] + " ")}'
                   f'{"" if units_orig[-1] is None else units_orig[-1]} {products_orig[-1]}')
     return origs_text
 
