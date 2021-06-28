@@ -15,7 +15,7 @@ def gramma_info(tokens, intent_start, intent_end, remove_stopwords=True):
             if p.normal_form in config.UNITS:
                 gr_i.setdefault(tokens[i], {})['normal_form'] = p.normal_form
                 gr_i[tokens[i]]['pos'] = 'UNITS'
-            elif p.normal_form.isnumeric():
+            elif p.normal_form.isnumeric() or p.normal_form == 'все' or p.normal_form == 'всё':
                 gr_i.setdefault(tokens[i], {})['normal_form'] = p.normal_form
                 gr_i[tokens[i]]['pos'] = 'NUM'
             else:
@@ -43,12 +43,18 @@ def tokens_parser(tokens_no_stopwords, gr_i):
             no_unit = False
         if gr_i[token]['pos'] == 'ADVB':
             if prep:
-                products[-1] = products[-1] + ' ' + prep + ' ' + token
-                products_orig[-1] = products_orig[-1] + ' ' + prep_orig + ' ' + token
+                try:
+                    products[-1] = products[-1] + ' ' + prep + ' ' + token
+                    products_orig[-1] = products_orig[-1] + ' ' + prep_orig + ' ' + token
+                except IndexError:
+                    pass
                 prep = ''
             else:
-                products[-1] = products[-1] + ' ' + token
-                products_orig[-1] = products_orig[-1] + ' ' + token
+                try:
+                    products[-1] = products[-1] + ' ' + token
+                    products_orig[-1] = products_orig[-1] + ' ' + token
+                except IndexError:
+                    pass
         if gr_i[token]['pos'] == 'ADJF':
             adj = gr_i[token]['normal_form']
             adj_orig = token
@@ -62,8 +68,11 @@ def tokens_parser(tokens_no_stopwords, gr_i):
                 w_norm = make_agree(str(adj + ' ' + w_norm))
                 w_orig = adj_orig + ' ' + w_orig
             if prep:
-                products[-1] = products[-1] + ' ' + prep + ' ' + w_orig
-                products_orig[-1] = products_orig[-1] + ' ' + prep_orig + ' ' + w_orig
+                try:
+                    products[-1] = products[-1] + ' ' + prep + ' ' + w_orig
+                    products_orig[-1] = products_orig[-1] + ' ' + prep_orig + ' ' + w_orig
+                except IndexError:
+                    pass
                 no_quantity, no_unit = True, True
                 adj, prep = '', ''
                 continue
@@ -102,7 +111,3 @@ def make_agree(product: str, by='gender', gr_case='nomn'):
                 break
         words = ' '.join(words)
     return words
-
-
-def merge_items(products):
-    pass

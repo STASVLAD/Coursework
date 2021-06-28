@@ -45,6 +45,7 @@ def add_items(conn, user_id, products, quantities, units):
     '''
     Добавление продуктов в список покупок пользователя
     '''
+    quantities = [quantity if quantity.isnumeric() else 1 for quantity in quantities]
     with conn.cursor(cursor_factory=DictCursor) as cursor:
         rows = list(zip(*(products, quantities, units)))
         VALUES = ', '.join((f"('{user_id}', '{row[0]}', {row[1]}, "
@@ -66,6 +67,7 @@ def del_items(conn, user_id, products=None, quantities=None, all=False):
     '''
     Удаление продуктов из списка покупок пользователя
     '''
+    quantities = [quantity if quantity.isnumeric() else 1000 for quantity in quantities]
     with conn.cursor(cursor_factory=DictCursor) as cursor:
         if all:
             update = f"""UPDATE shopping_list

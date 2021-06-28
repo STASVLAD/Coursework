@@ -86,7 +86,8 @@ def dialog_handler(req, res, conn):
         thr.start()
 
     # обработка кнопок "+ <товар>"
-    elif req['request'].get("command") and req['request']['original_utterance'][0:2] == "+ ":
+    elif (req.get('buttons', {}).get('payload') == 'add_items' or
+          req['request'].get('original_utterance', "+ ")[0:2] == "+ "):
         tokens = req['request']['nlu']['tokens']
         product_tokens = [token for token in tokens if len(token) > 1]
         product = ' '.join(product_tokens)
@@ -113,7 +114,8 @@ def dialog_handler(req, res, conn):
         conn.close()
 
     # обработка кнопок "- <товар>, <кол-во>"
-    elif req['request'].get("command") and req['request']['original_utterance'][0:2] == "- ":
+    elif (req.get('buttons', {}).get('payload') == 'del_items' or
+          req['request'].get('original_utterance', "- ")[0:2] == "- "):
         tokens = req['request']['nlu']['tokens']
         product_tokens = [token for token in tokens if len(token) > 1]
         quantity = [token for token in tokens if token.isnumeric()][0]
@@ -141,7 +143,11 @@ def dialog_handler(req, res, conn):
     # обработка рецептурных рекомендаций
     elif req['request']['nlu']['intents'].get("suggest_items_recipes"):
         recs_recipe = db.get_recipes(conn, user_id)
-        response.suggest_recipes_response(res, recs_recipe[0][0])
+        if recs_recipe is None:
+            recs_recipe = []
+        else:
+            recs_recipe = recs_recipe[0][0]
+        response.suggest_recipes_response(res, recs_recipe)
         conn.close()
 
     # вывод стоимости товара
@@ -160,6 +166,10 @@ def dialog_handler(req, res, conn):
         db.purge_table(conn)
         res['response']['text'] = 'ТАБЛИЦА УДАЛЕНА'
         conn.close()
+
+    # показ рецептов
+    elif req.get('buttons', {}).get('payload') == 'recipes':
+        pass
 
     else:
         res['response']['text'] = 'Давайте к делу'
