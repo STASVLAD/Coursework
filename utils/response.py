@@ -3,7 +3,7 @@ def add_items_response(res, products_orig, quantities, units_orig):
     Ответ системы пользователю в случае добавления товаров
     '''
     if len(products_orig) == 1:
-        res['response']['text'] = (f'Добавила {"" if int(quantities[0]) == 1 else quantities[0] + " "}'
+        res['response']['text'] = (f'Добавила {"" if int(quantities[0]) == 1 else str(quantities[0]) + " "}'
                                    f'{"" if units_orig[0] is None else units_orig[0] + " "}'
                                    f'{products_orig[0]} в ваш список покупок.')
     else:
@@ -30,7 +30,7 @@ def del_items_response(res, products_orig: list, quantities: list, units_orig, m
                                    f'{products_orig[0]} из вашего списка покупок.')
 
     elif len(products_orig) == 1:
-        res['response']['text'] = (f'Удалила {"" if int(quantities[0]) == 1 else quantities[0] + " "}'
+        res['response']['text'] = (f'Удалила {"" if int(quantities[0]) == 1 else str(quantities[0]) + " "}'
                                    f'{"" if units_orig[0] is None else units_orig[0] + " "}'
                                    f'{products_orig[0]} из вашего списка покупок.')
     else:
@@ -87,11 +87,11 @@ def items_to_text(products_orig: list, quantities: list, units_orig):
     '''
     Форматирование списка добавленных/удаленных товаров для ответа пользователю
     '''
-    origs_text = ', '.join((f'{"" if quantities[i] == 1 else quantities[i] + " "}'
+    origs_text = ', '.join((f'{"" if quantities[i] == 1 else str(quantities[i]) + " "}'
                             f'{"" if units_orig[i] is None else units_orig[i] + " "}'
                             f'{products_orig[i]}')
                            for i in range(len(products_orig) - 1))
-    origs_text = (f'{origs_text} и {"" if quantities[-1] == 1 else quantities[-1] + " "}'
+    origs_text = (f'{origs_text} и {"" if quantities[-1] == 1 else str(quantities[-1]) + " "}'
                   f'{"" if units_orig[-1] is None else units_orig[-1] + " "}'
                   f'{products_orig[-1]}')
     return origs_text

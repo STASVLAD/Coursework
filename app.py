@@ -87,7 +87,7 @@ def dialog_handler(req, res, conn):
 
     # обработка кнопок "+ <товар>"
     elif (req.get('buttons', {}).get('payload') == 'add_items' or
-          req['request'].get('original_utterance', "+ ")[0:2] == "+ "):
+          req['request'].get('original_utterance', "None")[0:2] == "+ "):
         tokens = req['request']['nlu']['tokens']
         product_tokens = [token for token in tokens if len(token) > 1]
         product = ' '.join(product_tokens)
@@ -115,7 +115,7 @@ def dialog_handler(req, res, conn):
 
     # обработка кнопок "- <товар>, <кол-во>"
     elif (req.get('buttons', {}).get('payload') == 'del_items' or
-          req['request'].get('original_utterance', "- ")[0:2] == "- "):
+          req['request'].get('original_utterance', "None")[0:2] == "- "):
         tokens = req['request']['nlu']['tokens']
         product_tokens = [token for token in tokens if len(token) > 1]
         quantity = [token for token in tokens if token.isnumeric()][0]
