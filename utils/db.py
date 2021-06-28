@@ -45,6 +45,9 @@ def add_items(conn, user_id, products, quantities, units):
     '''
     Добавление продуктов в список покупок пользователя
     '''
+    if products is None:
+        return
+
     quantities = [quantity if isinstance(quantity, int) else 1 for quantity in quantities]
     with conn.cursor(cursor_factory=DictCursor) as cursor:
         rows = list(zip(*(products, quantities, units)))
@@ -68,7 +71,7 @@ def del_items(conn, user_id, products=None, quantities=None, all=False):
     Удаление продуктов из списка покупок пользователя
     '''
     with conn.cursor(cursor_factory=DictCursor) as cursor:
-        if all:
+        if all or products is None:
             update = f"""UPDATE shopping_list
                          SET quantity = 0
                          WHERE user_id = '{user_id}';"""

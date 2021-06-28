@@ -6,6 +6,8 @@ def add_items_response(res, products_orig, quantities, units_orig):
         res['response']['text'] = (f'Добавила {"" if int(quantities[0]) == 1 else str(quantities[0]) + " "}'
                                    f'{"" if units_orig[0] is None else units_orig[0] + " "}'
                                    f'{products_orig[0]} в ваш список покупок.')
+    elif len(products_orig) == 0:
+        res['response']['text'] = 'Повторите, пожалуйста'
     else:
         origs_text = items_to_text(products_orig, quantities, units_orig)
         res['response']['text'] = f'Добавила в ваш список покупок {origs_text}.'
@@ -33,6 +35,9 @@ def del_items_response(res, products_orig: list, quantities: list, units_orig, m
         res['response']['text'] = (f'Удалила {"" if int(quantities[0]) == 1 else str(quantities[0]) + " "}'
                                    f'{"" if units_orig[0] is None else units_orig[0] + " "}'
                                    f'{products_orig[0]} из вашего списка покупок.')
+    elif len(products_orig) == 0:
+        res['response']['text'] = 'Ваш список покупок теперь пуст!'
+
     else:
         origs_text = items_to_text(products_orig, quantities, units_orig)
         res['response']['text'] = f'Удалила из вашего списка покупок {origs_text}.'
