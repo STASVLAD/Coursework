@@ -106,6 +106,8 @@ def update_freq(conn, user_id, products):
     '''
     Обновление частоты рекомендаций товара
     '''
+    if len(products) == 0:
+        return
     with conn.cursor(cursor_factory=DictCursor) as cursor:
         update = f"""UPDATE shopping_list
                      SET frequency = array_append(frequency, current_timestamp(0) - shopping_list.created_on)

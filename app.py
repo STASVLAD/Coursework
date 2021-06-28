@@ -100,6 +100,7 @@ def dialog_handler(req, res, conn):
         intent_end = int(req['request']['nlu']['intents']['del_items']['slots']['food']['tokens']['end'])
 
         tokens_no_stopwords, gr_i = parser.gramma_info(tokens, intent_start, intent_end)
+        #TODO: quantities_orig
         products, quantities, units, products_orig, units_orig = parser.tokens_parser(tokens_no_stopwords, gr_i)
         response.del_items_response(res, products_orig, quantities, units_orig)
         db.del_items(conn, user_id, products, quantities)
@@ -180,7 +181,7 @@ def dialog_handler(req, res, conn):
 '''
 TEST_PHRASE:
 <<<ADD GOLD>>>
-Добавь в список покупок 1 бутылку воды, 2 килограмма огурцов, 2 помидора, репчатый лук, острую морковку по-корейски, сметану и упаковку молока, 2 пачки масла и колбасу, пармезан, а ещё, пожалуйста, острую приправу для лосося, пачку кофе и 2 пачки чая.
+Добавь в список покупок 1 бутылку воды, 2 килограмма огурцов, 2 помидора, репчатый лук, острую морковку по-корейски, сметану и упаковку молока, 2 пачки масла и колбасу, пармезан, а ещё, пожалуйста, острую приправу для лосося, 1 кофе и 2 пачки чая.
 <<<ADD NORM>>>
 Добавь в список покупок 1 бутылку воды, огурцы, помидоры, острую морковку по-корейски в кляре, сметану и пакет молока, 2 бутылки оливкового масла и колбасу, пармезан, а ещё острую приправу для сырого лосося и хороший бальзам для лица и нежный чай.
 <<<ADD TRASH>>>
