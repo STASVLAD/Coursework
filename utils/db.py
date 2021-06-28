@@ -1,3 +1,4 @@
+import os
 import psycopg2
 from psycopg2.extras import DictCursor
 
@@ -6,7 +7,8 @@ def connect():
     '''
     Подключение к БД
     '''
-    return psycopg2.connect(dbname='postgres', user='postgres', password='coursework')
+    DATABASE_URL = os.environ['DATABASE_URL']
+    return psycopg2.connect(DATABASE_URL, sslmode='require')
 
 
 def purge_table(conn):
