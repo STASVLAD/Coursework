@@ -57,7 +57,7 @@ def suggest_recipes(df, basket):
     Рекомендация рецептов для пользователя 
     '''
     best_recipes = []
-    for i in range(5):
+    for _ in range(5):
         scores = df['ingredients'].apply(eval_score, args=(basket,)).sort_values(ascending=False)
         best_ingredients = set(scores[0][1])
         best_recipes.append(scores.index[0])
