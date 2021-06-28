@@ -15,7 +15,8 @@ def gramma_info(tokens, intent_start, intent_end, remove_stopwords=True):
             if p.normal_form in config.UNITS:
                 gr_i.setdefault(tokens[i], {})['normal_form'] = p.normal_form
                 gr_i[tokens[i]]['pos'] = 'UNITS'
-            elif p.normal_form.isnumeric() or p.normal_form == 'всё' or p.normal_form == 'весь':
+            elif (p.normal_form.isnumeric() or p.normal_form == 'всё' or
+                  p.normal_form == 'все' or p.normal_form == 'весь'):
                 gr_i.setdefault(tokens[i], {})['normal_form'] = p.normal_form
                 gr_i[tokens[i]]['pos'] = 'NUM'
             else:
