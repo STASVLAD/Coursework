@@ -15,7 +15,7 @@ def gramma_info(tokens, intent_start, intent_end, remove_stopwords=True):
             if p.normal_form in config.UNITS:
                 gr_i.setdefault(tokens[i], {})['normal_form'] = p.normal_form
                 gr_i[tokens[i]]['pos'] = 'UNITS'
-            elif p.normal_form.isnumeric() or p.normal_form == 'все' or p.normal_form == 'всё':
+            elif p.normal_form.isnumeric() or p.normal_form == 'всё' or p.normal_form == 'весь':
                 gr_i.setdefault(tokens[i], {})['normal_form'] = p.normal_form
                 gr_i[tokens[i]]['pos'] = 'NUM'
             else:
@@ -35,7 +35,10 @@ def tokens_parser(tokens_no_stopwords, gr_i):
 
     for token in tokens_no_stopwords:
         if gr_i[token]['pos'] == 'NUM':
-            quantities.append(int(gr_i[token]['normal_form']))
+            try:
+                quantities.append(int(gr_i[token]['normal_form']))
+            except ValueError:
+                quantities.append(gr_i[token]['normal_form'])
             no_quantity = False
         if gr_i[token]['pos'] == 'UNITS':
             units.append(gr_i[token]['normal_form'])

@@ -67,13 +67,13 @@ def del_items(conn, user_id, products=None, quantities=None, all=False):
     '''
     Удаление продуктов из списка покупок пользователя
     '''
-    quantities = [quantity if isinstance(quantity, int) else 1000 for quantity in quantities]
     with conn.cursor(cursor_factory=DictCursor) as cursor:
         if all:
             update = f"""UPDATE shopping_list
                          SET quantity = 0
                          WHERE user_id = '{user_id}';"""
         else:
+            quantities = [quantity if isinstance(quantity, int) else 1000 for quantity in quantities]
             rows = list(zip(*(products, quantities)))
             CONDITIONS = '\n'.join((f"WHEN product = '{row[0]}'"
                                     f"THEN GREATEST(quantity - {row[1]}, 0)") for row in rows)

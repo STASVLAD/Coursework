@@ -63,13 +63,6 @@ def dialog_handler(req, res, conn):
             res['response']['text'] = 'Привет!\n' + res['response']['text']
             conn.close()
 
-    # очистить список
-    elif (req.get('buttons', {}).get('payload') == 'del_all' or
-          req['request']['nlu']['intents'].get('del_all_items')):
-        res['response']['text'] = 'Ваш список покупок теперь пуст!'
-        db.del_items(conn, user_id, all=True)
-        conn.close()
-
     ###
     # добавить продукты
     elif req['request']['nlu']['intents'].get("add_items"):
@@ -124,6 +117,13 @@ def dialog_handler(req, res, conn):
         response.del_items_response(res, [orig], [quantity], [None], minus=True)
         db.del_items(conn, user_id, [product], [quantity])
         db.update_freq(conn, user_id, [product])
+        conn.close()
+
+    # очистить список
+    elif (req.get('buttons', {}).get('payload') == 'del_all' or
+          req['request']['nlu']['intents'].get('del_all_items')):
+        res['response']['text'] = 'Ваш список покупок теперь пуст!'
+        db.del_items(conn, user_id, all=True)
         conn.close()
     ###
 
@@ -180,7 +180,7 @@ def dialog_handler(req, res, conn):
 '''
 TEST_PHRASE:
 <<<ADD GOLD>>>
-Добавь в список покупок 1 бутылку воды, 2 килограмма огурцов, 2 помидора, репчатый лук, острую морковку по-корейски, сметану и упаковку молока, 2 пачки масла и колбасу, пармезан, а ещё, пожалуйста, острую приправу для лосося и пачку чая.
+Добавь в список покупок 1 бутылку воды, 2 килограмма огурцов, 2 помидора, репчатый лук, острую морковку по-корейски, сметану и упаковку молока, 2 пачки масла и колбасу, пармезан, а ещё, пожалуйста, острую приправу для лосося, пачку кофе и 2 пачки чая.
 <<<ADD NORM>>>
 Добавь в список покупок 1 бутылку воды, огурцы, помидоры, острую морковку по-корейски в кляре, сметану и пакет молока, 2 бутылки оливкового масла и колбасу, пармезан, а ещё острую приправу для сырого лосося и хороший бальзам для лица и нежный чай.
 <<<ADD TRASH>>>
