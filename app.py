@@ -72,6 +72,7 @@ def dialog_handler(req, res, conn):
 
         tokens_no_stopwords, gr_i = parser.gramma_info(tokens, intent_start, intent_end)
         products, quantities, units, _, _ = parser.tokens_parser(tokens_no_stopwords, gr_i)
+        products, quantities, units = parser.remove_duplicates(products, quantities, units)
         response.add_items_response(res, products)
         db.add_items(conn, user_id, products, quantities, units)
 
@@ -104,6 +105,7 @@ def dialog_handler(req, res, conn):
 
         tokens_no_stopwords, gr_i = parser.gramma_info(tokens, intent_start, intent_end)
         products, quantities, units, _, _ = parser.tokens_parser(tokens_no_stopwords, gr_i)
+        products, quantities, units = parser.remove_duplicates(products, quantities, units)
         response.del_items_response(res, products)
         db.del_items(conn, user_id, products, quantities)
         db.update_freq(conn, user_id, products)

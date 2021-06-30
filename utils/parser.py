@@ -118,3 +118,16 @@ def make_agree(product: str, by='gender', gr_case='nomn'):
                 break
         words = ' '.join(words)
     return words
+
+
+def remove_duplicates(products, quantities, units):
+    no_dupes = ([], [], [])
+    for i in range(len(products)):
+        if products[i] not in no_dupes[0]:
+            no_dupes[0].append(products[i])
+            no_dupes[1].append(quantities[i])
+            no_dupes[2].append(units[i])
+        else:
+            j = no_dupes[0].index(products[i])
+            no_dupes[1][j] += quantities[i]
+    return no_dupes
