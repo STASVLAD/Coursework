@@ -176,7 +176,7 @@ def dialog_handler(req, res, conn):
         conn.close()
 
     # показ рецептов
-    elif ['request'].get('payload') == 'recipes':
+    elif req['request'].get('payload') == 'recipes':
         pass
 
     else:
