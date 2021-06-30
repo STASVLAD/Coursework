@@ -79,11 +79,14 @@ def dialog_handler(req, res, conn):
         thr.start()
 
     # обработка кнопок "+ <товар>"
-    elif (req['request'].get('payload') == 'add_items' or
+    elif (req['request'].get('payload').split('__')[0] == 'add_items' or
           req['request'].get('original_utterance', "None")[0:2] == "+ "):
         tokens = req['request']['nlu']['tokens']
-        product_tokens = [token for token in tokens if len(token) > 1]
-        product = ' '.join(product_tokens)
+        if tokens:
+            product_tokens = [token for token in tokens if len(token) > 1]
+            product = ' '.join(product_tokens)
+        else:
+            product = req['request'].get('payload').split('__')[1]
         orig = parser.make_agree(product, by='gr_case', gr_case='accs')
         response.add_items_response(res, [orig], [1], [None])
         db.add_items(conn, user_id, [product], [1], [None])
@@ -107,16 +110,21 @@ def dialog_handler(req, res, conn):
         conn.close()
 
     # обработка кнопок "- <товар>, <кол-во>"
-    elif (req['request'].get('payload') == 'del_items' or
+    elif (req['request'].get('payload').split('__')[0] == 'del_items' or
           req['request'].get('original_utterance', "None")[0:2] == "- "):
         tokens = req['request']['nlu']['tokens']
-        product_tokens = [token for token in tokens if len(token) > 1]
-        quantity = [token for token in tokens if token.isnumeric()][0]
-        product = ' '.join(product_tokens)
+        if tokens:
+            product_tokens = [token for token in tokens if len(token) > 1]
+            quantity = [token for token in tokens if token.isnumeric()][0]
+            product = ' '.join(product_tokens)
+        else:
+            product, quantity = req['request'].get('payload').split('__')[1].split('_')
+
         orig = parser.make_agree(product, by='gr_case', gr_case='accs')
-        response.del_items_response(res, [orig], minus=True)
+        response.del_items_response(res, [orig])
         db.del_items(conn, user_id, [product], [quantity])
         db.update_freq(conn, user_id, [product])
+
         conn.close()
 
     # очистить список

@@ -83,9 +83,11 @@ def show_shopping_list(res, shopping_list):
     Форматирование текущего списка покупок для ответа пользователю
     '''
     for item in shopping_list:
+        title = f'- {item[0]}, {item[1]} {item[2][0] + "." if item[2] != "-1" else ""}'
+        hint = f'{item[0]}_{item[1]}'
         res['response'].setdefault('buttons', []).append(
-            {'title': f'- {item[0]}, {item[1]} {item[2][0] + "." if item[2] != "-1" else ""}',
-             'payload': 'del_items',
+            {'title': title,
+             'payload': f'del_items__{hint}',
              'hide': False})
 
 
@@ -109,7 +111,7 @@ def suggest_freq_response(res, recs_freq):
         for item in recs_freq:
             res['response'].setdefault('buttons', []).append(
                 {'title': f'+ {item}',
-                 'payload': 'add_items',
+                 'payload': f'add_items__{item}',
                  'hide': False})
     else:
         res['response']['text'] = 'Похоже Вы уже все купили'
@@ -120,6 +122,7 @@ def suggest_recipes_response(res, recs_recipes):
     '''
     Ответ системы пользователю в случае получения рекомендации по рецептам
     '''
+    recs_recipes_rus = []
     if len(recs_recipes) > 0:
         res['response']['text'] = 'Предлагаю Вам следующие рецепты:'
 
