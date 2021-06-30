@@ -10,7 +10,8 @@ def add_items_response(res, products: list):
         return
 
     if len(products) == 1:
-        res['response']['text'] = (f'Добавила {products[0]} в ваш список покупок.')
+        product = make_agree(products[0], by='gr_case', gr_case='accs')
+        res['response']['text'] = (f'Добавила {product} в ваш список покупок.')
     else:
         origs_text = items_to_text(products)
         res['response']['text'] = f'Добавила в ваш список покупок {origs_text}.'
