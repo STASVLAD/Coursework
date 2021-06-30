@@ -1,4 +1,4 @@
-from parser import make_agree
+from utils.parser import make_agree
 
 
 def add_items_response(res, products: list):
@@ -92,6 +92,7 @@ def items_to_text(products: list):
     '''
     Форматирование списка добавленных/удаленных товаров для ответа пользователю
     '''
+    products = [make_agree(product, by='gr_case', gr_case='accs') for product in products]
     origs_text = ', '.join(f'{products[i]}' for i in range(len(products) - 1))
     origs_text = f'{origs_text} и {products[-1]}'
     return origs_text
