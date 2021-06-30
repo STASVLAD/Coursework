@@ -1,7 +1,7 @@
 from utils import config
 
 
-def gramma_info(tokens, intent_start, intent_end, remove_stopwords=True):
+def gramma_info(tokens, intent_start, intent_end):
     '''
     Удаление стоп-слов, лемматизация, определение POS-тэгов (число/единица измерения/часть речи)
     '''
@@ -9,19 +9,22 @@ def gramma_info(tokens, intent_start, intent_end, remove_stopwords=True):
     tokens_no_stopwords = []
 
     for i in range(intent_start, intent_end):
-        if tokens[i] not in config.STOP_WORDS:
-            tokens_no_stopwords.append(tokens[i])
-            p = config.morph.parse(tokens[i])[0]
-            if p.normal_form in config.UNITS:
-                gr_i.setdefault(tokens[i], {})['normal_form'] = p.normal_form
-                gr_i[tokens[i]]['pos'] = 'UNITS'
-            elif (p.normal_form.isnumeric() or p.normal_form == 'всё' or
-                  p.normal_form == 'все' or p.normal_form == 'весь'):
-                gr_i.setdefault(tokens[i], {})['normal_form'] = p.normal_form
-                gr_i[tokens[i]]['pos'] = 'NUM'
-            else:
-                gr_i.setdefault(tokens[i], {})['normal_form'] = p.normal_form
-                gr_i[tokens[i]]['pos'] = str(p.tag.POS)
+        try:
+            if tokens[i] not in config.STOP_WORDS:
+                tokens_no_stopwords.append(tokens[i])
+                p = config.morph.parse(tokens[i])[0]
+                if p.normal_form in config.UNITS:
+                    gr_i.setdefault(tokens[i], {})['normal_form'] = p.normal_form
+                    gr_i[tokens[i]]['pos'] = 'UNITS'
+                elif (p.normal_form.isnumeric() or p.normal_form == 'всё' or
+                      p.normal_form == 'все' or p.normal_form == 'весь'):
+                    gr_i.setdefault(tokens[i], {})['normal_form'] = p.normal_form
+                    gr_i[tokens[i]]['pos'] = 'NUM'
+                else:
+                    gr_i.setdefault(tokens[i], {})['normal_form'] = p.normal_form
+                    gr_i[tokens[i]]['pos'] = str(p.tag.POS)
+        except IndexError:
+            continue
 
     return tokens_no_stopwords, gr_i
 
@@ -30,7 +33,7 @@ def tokens_parser(tokens_no_stopwords, gr_i):
     '''
     Парсер запросов
     '''
-    adj, prep, advb = '', '', ''
+    adj, prep = '', ''
     products_orig, products, quantities, units_orig, units = [], [], [], [], []
     no_quantity, no_unit = True, True
 

@@ -71,8 +71,8 @@ def dialog_handler(req, res, conn):
         intent_end = req['request']['nlu']['intents']['add_items']['slots']['food']['tokens']['end']
 
         tokens_no_stopwords, gr_i = parser.gramma_info(tokens, intent_start, intent_end)
-        products, quantities, units, products_orig, units_orig = parser.tokens_parser(tokens_no_stopwords, gr_i)
-        response.add_items_response(res, products_orig, quantities, units_orig)
+        products, quantities, units, _, _ = parser.tokens_parser(tokens_no_stopwords, gr_i)
+        response.add_items_response(res, products)
         db.add_items(conn, user_id, products, quantities, units)
 
         thr = threading.Thread(target=db_handler, args=(conn, user_id))
@@ -100,9 +100,8 @@ def dialog_handler(req, res, conn):
         intent_end = int(req['request']['nlu']['intents']['del_items']['slots']['food']['tokens']['end'])
 
         tokens_no_stopwords, gr_i = parser.gramma_info(tokens, intent_start, intent_end)
-        #TODO: quantities_orig
-        products, quantities, units, products_orig, units_orig = parser.tokens_parser(tokens_no_stopwords, gr_i)
-        response.del_items_response(res, products_orig, quantities, units_orig)
+        products, quantities, units, _, _ = parser.tokens_parser(tokens_no_stopwords, gr_i)
+        response.del_items_response(res, products)
         db.del_items(conn, user_id, products, quantities)
         db.update_freq(conn, user_id, products)
         conn.close()
@@ -115,13 +114,13 @@ def dialog_handler(req, res, conn):
         quantity = [token for token in tokens if token.isnumeric()][0]
         product = ' '.join(product_tokens)
         orig = parser.make_agree(product, by='gr_case', gr_case='accs')
-        response.del_items_response(res, [orig], [quantity], [None], minus=True)
+        response.del_items_response(res, [orig], minus=True)
         db.del_items(conn, user_id, [product], [quantity])
         db.update_freq(conn, user_id, [product])
         conn.close()
 
     # очистить список
-    elif (req.get('buttons', {}).get('payload') == 'del_all' or
+    elif (req['request'].get('payload') == 'del_all' or
           req['request']['nlu']['intents'].get('del_all_items')):
         res['response']['text'] = 'Ваш список покупок теперь пуст!'
         db.del_items(conn, user_id, all=True)
@@ -169,7 +168,7 @@ def dialog_handler(req, res, conn):
         conn.close()
 
     # показ рецептов
-    elif req.get('buttons', {}).get('payload') == 'recipes':
+    elif ['request'].get('payload') == 'recipes':
         pass
 
     else:

@@ -62,6 +62,6 @@ def suggest_recipes(df, basket):
         best_ingredients = set(scores[0][1])
         best_recipes.append(scores.index[0])
         basket = basket - best_ingredients
-        if len(basket) <= 1:
+        if len(basket) <= 1 or scores[0][0] <= 0.2:
             break
     return best_recipes

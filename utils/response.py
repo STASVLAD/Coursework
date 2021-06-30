@@ -1,21 +1,25 @@
-def add_items_response(res, products_orig, quantities, units_orig):
+from parser import make_agree
+
+
+def add_items_response(res, products: list):
     '''
     Ответ системы пользователю в случае добавления товаров
     '''
-    if len(products_orig) == 1:
-        res['response']['text'] = (f'Добавила {"" if quantities[0] == 1 else str(quantities[0]) + " "}'
-                                   f'{"" if units_orig[0] is None else units_orig[0] + " "}'
-                                   f'{products_orig[0]} в ваш список покупок.')
-    elif len(products_orig) == 0:
+    if len(products) == 0:
         res['response']['text'] = 'Повторите, пожалуйста'
+        return
+
+    if len(products) == 1:
+        res['response']['text'] = (f'Добавила {products[0]} в ваш список покупок.')
     else:
-        origs_text = items_to_text(products_orig, quantities, units_orig)
+        origs_text = items_to_text(products)
         res['response']['text'] = f'Добавила в ваш список покупок {origs_text}.'
 
-    res['response'].setdefault('buttons', []).append(
-        {'title': 'Список покупок',
-         'payload': 'get_items',
-         'hide': True})
+    # res['response'].setdefault('buttons', []).append(
+    #     {'title': 'Список покупок',
+    #      'payload': 'get_items',
+    #      'hide': True})
+
     res['response']['buttons'].append(
         {'title': 'Список покупок',
          'payload': 'get_items',
@@ -23,34 +27,30 @@ def add_items_response(res, products_orig, quantities, units_orig):
     return
 
 
-def del_items_response(res, products_orig: list, quantities: list, units_orig, minus=False):
+def del_items_response(res, products: list):
     '''
     Ответ системы пользователю в случае удаления товаров
     '''
-    if minus == True:
-        res['response']['text'] = (f'Удалила {"" if units_orig[0] is None else units_orig[0] + " "}'
-                                   f'{products_orig[0]} из вашего списка покупок.')
-
-    elif len(products_orig) == 1:
-        res['response']['text'] = (f'Удалила {"" if quantities[0] == 1 else str(quantities[0]) + " "}'
-                                   f'{"" if units_orig[0] is None else units_orig[0] + " "}'
-                                   f'{products_orig[0]} из вашего списка покупок.')
-    elif len(products_orig) == 0:
+    if len(products) == 0:
         res['response']['text'] = 'Ваш список покупок теперь пуст!'
+        return
 
+    if len(products) == 1:
+        product = make_agree(products[0], by='gr_case', gr_case='accs')
+        res['response']['text'] = (f'Удалила {product} из вашего списка покупок.')
     else:
-        origs_text = items_to_text(products_orig, quantities, units_orig)
+        origs_text = items_to_text(products)
         res['response']['text'] = f'Удалила из вашего списка покупок {origs_text}.'
 
-    res['response'].setdefault('buttons', []).append(
-        {'title': 'Список покупок',
-         'payload': 'get_items',
-         'hide': True})
     res['response']['buttons'].append(
         {'title': 'Список покупок',
          'payload': 'get_items',
          'hide': False})
     '''
+    res['response'].setdefault('buttons', []).append(
+        {'title': 'Список покупок',
+         'payload': 'get_items',
+         'hide': True})
     res['response']['buttons'].append(
         {'title': 'Очистить',
          'payload': 'del_all',
@@ -88,17 +88,12 @@ def show_shopping_list(res, shopping_list):
              'hide': False})
 
 
-def items_to_text(products_orig: list, quantities: list, units_orig):
+def items_to_text(products: list):
     '''
     Форматирование списка добавленных/удаленных товаров для ответа пользователю
     '''
-    origs_text = ', '.join((f'{"" if quantities[i] == 1 else str(quantities[i]) + " "}'
-                            f'{"" if units_orig[i] is None else units_orig[i] + " "}'
-                            f'{products_orig[i]}')
-                           for i in range(len(products_orig) - 1))
-    origs_text = (f'{origs_text} и {"" if quantities[-1] == 1 else str(quantities[-1]) + " "}'
-                  f'{"" if units_orig[-1] is None else units_orig[-1] + " "}'
-                  f'{products_orig[-1]}')
+    origs_text = ', '.join(f'{products[i]}' for i in range(len(products) - 1))
+    origs_text = f'{origs_text} и {products[-1]}'
     return origs_text
 
 
