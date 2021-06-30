@@ -15,15 +15,16 @@ def add_items_response(res, products: list):
         origs_text = items_to_text(products)
         res['response']['text'] = f'Добавила в ваш список покупок {origs_text}.'
 
-    # res['response'].setdefault('buttons', []).append(
-    #     {'title': 'Список покупок',
-    #      'payload': 'get_items',
-    #      'hide': True})
-
-    res['response']['buttons'].append(
+    res['response'].setdefault('buttons', []).append(
         {'title': 'Список покупок',
          'payload': 'get_items',
          'hide': False})
+    '''
+    res['response'].setdefault('buttons', []).append(
+        {'title': 'Список покупок',
+         'payload': 'get_items',
+         'hide': True})
+    '''
     return
 
 
@@ -42,7 +43,7 @@ def del_items_response(res, products: list):
         origs_text = items_to_text(products)
         res['response']['text'] = f'Удалила из вашего списка покупок {origs_text}.'
 
-    res['response']['buttons'].append(
+    res['response'].setdefault('buttons', []).append(
         {'title': 'Список покупок',
          'payload': 'get_items',
          'hide': False})
